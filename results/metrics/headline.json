@@ -1,0 +1,14 @@
+{
+  "n_model_condition": 18,
+  "mean_accuracy": 0.31162072748258757,
+  "dif_uniform_share_p05": 0.6068376068376068,
+  "dif_nonuniform_share_p05": 0.9017094017094017,
+  "invariance_rejected_share": 1.0,
+  "mean_worst_topic_recall_gap": 0.38377295645077125,
+  "prevalence_tv_naive": 0.5102471465133703,
+  "prevalence_tv_pooled": 0.4824917040253217,
+  "prevalence_tv_group": 0.3381720932292672,
+  "difference_tv_naive": 0.46112237278984886,
+  "difference_tv_pooled": 0.7457260807463989,
+  "difference_tv_group": 0.5193070007069265
+}
