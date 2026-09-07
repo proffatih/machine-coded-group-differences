@@ -31,12 +31,12 @@ prev = rd("prevalence_bias.csv")
 head = json.load(open(os.path.join(ROOT, "results", "metrics", "headline.json"),
                      encoding="utf-8"))
 
+# accuracy is read from corpus_accuracy.csv -- the same file Table 3 uses, so the
+# table and the prose cannot disagree
+cacc = rd("corpus_accuracy.csv")
 by_mc = collections.defaultdict(list)
-for r in acc:
+for r in cacc:
     by_mc[(r["model"], r["condition"])].append(r["accuracy"])
-by_m = collections.defaultdict(list)
-for r in acc:
-    by_m[r["model"]].append(r["accuracy"])
 
 # raw - standardised, by grouping
 std = collections.defaultdict(list)
@@ -83,12 +83,12 @@ for r in prev:
 
 CLAIMS = [
     ("chance rate .048", 1 / 21, .048, .001),
-    ("SmolLM2 zero-shot", mean(by_mc[("smollm2-1.7b", "zs")]), .074, .002),
-    ("OLMo-2 zero-shot ~.23", mean(by_mc[("olmo2-1b", "zs")]), .227, .002),
-    ("OLMo-2 codebook .230", mean(by_mc[("olmo2-1b", "cb")]), .230, .002),
-    ("OLMo-2 five-shot .106", mean(by_mc[("olmo2-1b", "fs")]), .106, .002),
-    ("Qwen2.5-3B zero-shot .469", mean(by_mc[("qwen2.5-3b", "zs")]), .469, .002),
-    ("Qwen2.5-3B codebook .498", mean(by_mc[("qwen2.5-3b", "cb")]), .498, .002),
+    ("SmolLM2 zero-shot .074", mean(by_mc[("smollm2-1.7b", "zs")]), .074, .002),
+    ("OLMo-2 zero-shot .22", mean(by_mc[("olmo2-1b", "zs")]), .223, .002),
+    ("OLMo-2 codebook .231", mean(by_mc[("olmo2-1b", "cb")]), .231, .002),
+    ("OLMo-2 five-shot .105", mean(by_mc[("olmo2-1b", "fs")]), .105, .002),
+    ("Qwen2.5-3B zero-shot .470", mean(by_mc[("qwen2.5-3b", "zs")]), .470, .002),
+    ("Qwen2.5-3B codebook .502", mean(by_mc[("qwen2.5-3b", "cb")]), .502, .002),
     ("std diff country .018", mean(std["country"]), .018, .002),
     ("std diff era .014", mean(std["era"]), .014, .002),
     ("std diff length .023", mean(std["length"]), .023, .002),

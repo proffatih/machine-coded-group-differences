@@ -156,7 +156,7 @@ GROUP_LABEL = {"country": "Country", "venue": "Institutional venue",
 
 
 def table3_accuracy():
-    rows = _read("subgroup_accuracy.csv")
+    rows = _read("corpus_accuracy.csv")
     if not rows:
         return None
     by = {}
@@ -231,7 +231,7 @@ Grouping & gap & Uniform & Non-uniform & $\chi^2$/df & Rejected \\
 
 
 def table5_correction():
-    prev = _read("prevalence_bias.csv"); acc = _read("subgroup_accuracy.csv")
+    prev = _read("prevalence_bias.csv"); acc = _read("corpus_accuracy.csv")
     if not (prev and acc):
         return None
     a = {}
