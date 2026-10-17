@@ -76,10 +76,10 @@ for r in lad:
 
 chi = collections.defaultdict(list)
 for r in lad:
-    chi[("sup" if r["model"] in SUP else "llm", r["grouping"])].append(float(r["cmi"]))
+    chi[("sup" if r["model"] in SUP else "llm", r["grouping"])].append(float(r["cmi_pairwise_mean"]))
 cmi_m = collections.defaultdict(list)
 for r in lad:
-    cmi_m[r["model"]].append(float(r["cmi"]))
+    cmi_m[r["model"]].append(float(r["cmi_pairwise_mean"]))
 wcr = list(csv.DictReader(open(os.path.join(RES, "within_corpus_invariance.csv"), encoding="utf-8")))
 from scipy import stats as _st
 GR = ("country", "venue", "length", "era")
@@ -226,17 +226,17 @@ C = [
     ("smollm fs .101",                   mean(by_mc[("smollm2-1.7b", "fs")]), .101, .001),
     ("phi most accurate LLM (zs)",       float(max(LLM, key=lambda m: mean(by_mc[(m, "zs")])) == "phi3.5-mini"), 1, 0),
     ("llm I min .036",                   min(mean(chi[("llm", g)]) for g in GR), .036, .0005),
-    ("llm I max .215",                   max(mean(chi[("llm", g)]) for g in GR), .215, .0005),
+    ("llm I max .117 (venue pairwise)",  max(mean(chi[("llm", g)]) for g in GR), .117, .0005),
     ("sup I min .016",                   min(mean(chi[("sup", g)]) for g in GR), .016, .0005),
-    ("sup I max .116",                   max(mean(chi[("sup", g)]) for g in GR), .116, .0005),
+    ("sup I max .069 (venue pairwise)",  max(mean(chi[("sup", g)]) for g in GR), .069, .0005),
     ("llm length I .054",                mean(chi[("llm", "length")]), .054, .0005),
     ("llm era I .036",                   mean(chi[("llm", "era")]), .036, .0005),
     ("sup length I .038",                mean(chi[("sup", "length")]), .038, .0005),
     ("sup era I .016",                   mean(chi[("sup", "era")]), .016, .0005),
-    ("phi I .060",                       mean(cmi_m["phi3.5-mini"]), .060, .0005),
-    ("qwen3b I .055",                    mean(cmi_m["qwen2.5-3b"]), .055, .0005),
-    ("logreg I .039",                    mean(cmi_m["tfidf-logreg"]), .039, .0005),
-    ("svm I .055",                       mean(cmi_m["tfidf-svm"]), .055, .0005),
+    ("phi I .044",                       mean(cmi_m["phi3.5-mini"]), .044, .0005),
+    ("qwen3b I .039",                    mean(cmi_m["qwen2.5-3b"]), .039, .0005),
+    ("logreg I .030",                    mean(cmi_m["tfidf-logreg"]), .030, .0005),
+    ("svm I .041",                       mean(cmi_m["tfidf-svm"]), .041, .0005),
     ("sup I < llm every grouping",       float(all(mean(chi[("sup", g)]) < mean(chi[("llm", g)]) for g in GR)), 1, 0),
     ("within llm length I .016",         wc["llm"]["combined_cmi_by_grouping"]["length"], .016, .0005),
     ("within llm era I .012",            wc["llm"]["combined_cmi_by_grouping"]["era"], .012, .0005),
@@ -257,9 +257,15 @@ C = [
     ("venue mean pairwise acc diff .070", float(np.mean([np.mean([abs(a - b) for a, b in itertools.combinations(v.values(), 2)]) for (m, c, g), v in cells.items() if g == "venue"])), .070, .0005),
     ("venue pairwise ~2x country",       float(np.mean([np.mean([abs(a - b) for a, b in itertools.combinations(v.values(), 2)]) for (m, c, g), v in cells.items() if g == "venue"])) / mean(gap["country"]), 2.2, .15),
     ("pooled-sup subgroup excess .137",  np.mean([float(r["tv_group_correction"]) - float(r["tv_naive"]) for r in ps_prev]), .137, .001),
-    ("pooled-sup I min .017",            min(np.mean([float(r["cmi"]) for r in ps_lad if r["grouping"] == g]) for g in GR), .017, .0005),
-    ("pooled-sup I max .098",            max(np.mean([float(r["cmi"]) for r in ps_lad if r["grouping"] == g]) for g in GR), .098, .0005),
+    ("pooled-sup I min .017",            min(np.mean([float(r["cmi_pairwise_mean"]) for r in ps_lad if r["grouping"] == g]) for g in GR), .017, .0005),
+    ("pooled-sup I max .058",            max(np.mean([float(r["cmi_pairwise_mean"]) for r in ps_lad if r["grouping"] == g]) for g in GR), .058, .0005),
     ("pooled-sup recall gap > llm every grouping", float(all(np.mean([float(r["gap"]) for r in csv.DictReader(open(os.path.join(PS, "per_topic_recall_gaps.csv"))) if r["grouping"] == g]) > mean(tgap[("llm", g)]) for g in GR)), 1, 0),
+    ("venue largest I llm",              float(max(GR, key=lambda g: mean(chi[("llm", g)])) == "venue"), 1, 0),
+    ("venue largest I sup",              float(max(GR, key=lambda g: mean(chi[("sup", g)])) == "venue"), 1, 0),
+    ("venue 5-group I all .205",         mean([r["cmi"] for r in lad if r["grouping"] == "venue"]), .205, .0005),
+    ("pooled-sup subgroup<pooled 14/26", float(sum(float(r["tv_group_correction"]) < float(r["tv_pooled_correction"]) for r in ps_prev)), 14, 0),
+    ("pooled-sup more accurate than any", float(min(mean([r["accuracy"] for r in ps_acc if r["model"] == m]) for m in ("tfidf-logreg-pooled", "tfidf-svm-pooled")) > max(mean(by_mc[k]) for k in by_mc)), 1, 0),
+    ("within rejected 41 of 44",         wc["llm"]["combined_rejected_share"] * 36 + wc["sup"]["combined_rejected_share"] * 4 + ps_wc["combined_rejected_share"] * 4, 41, .01),
 ]
 
 bad = 0

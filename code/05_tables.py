@@ -223,7 +223,7 @@ def table4_dif():
         non = _mean([1.0 if float(r["nonuniform_p"]) < .05 else 0.0 for r in d])
         rej = _mean([1.0 if float(r["p"]) < .05 else 0.0 for r in l])
         body.append(f"{GROUP_LABEL[g]} & {_mean(gaps):.3f} & {uni:.2f} & {non:.2f} & "
-                    f"{_mean([r['cmi'] for r in l]):.3f} & {rej:.2f} \\\\")
+                    f"{_mean([r['cmi_pairwise_mean'] for r in l]):.3f} & {rej:.2f} \\\\")
     tex = r"""\begin{table}[htbp]
 \centering
 \caption{Differential item functioning and invariance of the response structure, by
@@ -235,7 +235,9 @@ shuffled within each true topic, 1,999 draws), and Rejected is the share of test
 $p<.05$. $\hat{I}$ is the size of the departure: the excess of the likelihood-ratio
 statistic over its permutation mean, divided by twice the number of items, a
 bias-corrected estimate of the conditional mutual information between subgroup and
-assigned code given the true topic (nats; 0 means none). The accuracy gap is the largest
+assigned code given the true topic (nats; 0 means none); because it can only rise as a
+partition is refined, the venue row gives the mean over the ten two-venue comparisons
+(the five-group value is .205). The accuracy gap is the largest
 between-subgroup difference in raw agreement within each coder and prompt condition (for
 venue, the range over five subgroups). All columns pool both coder families and every
 prompt condition. Non-uniform DIF is near-universal while uniform DIF is not: the instrument is

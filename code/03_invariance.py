@@ -395,6 +395,16 @@ def main():
 
             # 3. invariance ladder + worst per-topic recall gap
             lad = invariance_ladder(yk, pk, gk)
+            # conditional mutual information can only rise as a partition is refined,
+            # so a many-group statistic is not on the scale of a two-group one; for
+            # those, also report the mean over the two-group comparisons
+            if len(gvals) > 2:
+                pw = [invariance_ladder(yk[np.isin(gk, [ga, gb])], pk[np.isin(gk, [ga, gb])],
+                                        gk[np.isin(gk, [ga, gb])])["cmi"]
+                      for ga, gb in itertools.combinations(gvals, 2)]
+                lad["cmi_pairwise_mean"] = float(np.mean(pw))
+            else:
+                lad["cmi_pairwise_mean"] = lad["cmi"]
             gap, gap_topic, per_t = per_topic_recall_gap(yk, pk, gk)
             lad.update({"model": model, "condition": cond, "grouping": gname,
                         "overall_accuracy": overall_acc,
