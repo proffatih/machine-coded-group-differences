@@ -67,11 +67,13 @@ def main():
     comb = {}
     for r in rows:
         k = (r["model"], r["condition"], r["grouping"])
-        c = comb.setdefault(k, {"stat": 0.0, "null": 0.0, "k": 0})
+        c = comb.setdefault(k, {"stat": 0.0, "null": 0.0, "k": 0, "n": 0})
         c["stat"] += r["lr_chi2"]; c["null"] = c["null"] + r.pop("_null"); c["k"] += 1
+        c["n"] += r["n"]
     for c in comb.values():
         c["p"] = float((1 + (c["null"] >= c["stat"]).sum()) / (len(c["null"]) + 1))
         c["ratio"] = float(c["stat"] / c["null"].mean())
+        c["cmi"] = float((c["stat"] - c["null"].mean()) / (2 * c["n"]))
 
     out = os.path.join(inv.OUT, "within_corpus_invariance.csv")
     import csv
@@ -91,6 +93,8 @@ def main():
             "combined_stat_over_null_range": [min(v["ratio"] for v in cs.values()),
                                               max(v["ratio"] for v in cs.values())],
             "combined_stat_over_null_mean": float(np.mean([v["ratio"] for v in cs.values()])),
+            "combined_cmi_by_grouping": {g: float(np.mean([v["cmi"] for k, v in cs.items() if k[2] == g]))
+                                         for g in sorted({k[2] for k in cs})},
             "corpus_tests": len(rs),
             "corpus_rejected_share": float(np.mean([r["p"] < .05 for r in rs])),
             "corpus_nonuniform_share": float(np.mean([r["nonuniform_p"] < .05 for r in rs])),

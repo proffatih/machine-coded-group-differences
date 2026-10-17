@@ -201,16 +201,16 @@ def fig5_ladder(ladder):
     models = sorted({r["model"] for r in ladder})
     x = np.arange(len(groupings)); w = 0.8 / max(len(models), 1)
     for i, m in enumerate(models):
-        vals = [np.mean([r["stat_over_null"] for r in ladder
+        vals = [np.mean([r["cmi"] for r in ladder
                          if r["grouping"] == g and r["model"] == m] or [np.nan])
                 for g in groupings]
         ax.bar(x + i * w - 0.4 + w / 2, vals, w, label=MODEL_LABEL.get(m, m),
                color=str(0.25 + 0.6 * i / max(len(models) - 1, 1)),
                edgecolor="black", linewidth=0.4)
-    ax.axhline(1.0, color="black", lw=0.8, ls="--")
-    ax.text(len(groupings) - 0.5, 1.0, " invariance", fontsize=6, va="bottom", ha="right")
+    ax.axhline(0.0, color="black", lw=0.8, ls="--")
+    ax.text(len(groupings) - 0.5, 0.0, " invariance", fontsize=6, va="bottom", ha="right")
     ax.set_xticks(x); ax.set_xticklabels(groupings)
-    ax.set_ylabel("LR statistic / permutation-null mean")
+    ax.set_ylabel("conditional mutual information (nats)")
     ax.set_title("Invariance test of the confusion structure")
     ax.legend(frameon=False, ncol=2, fontsize=6)
     fig.savefig(os.path.join(FIG, "fig5_invariance_ladder.png")); plt.close(fig)

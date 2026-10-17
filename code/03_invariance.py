@@ -226,8 +226,10 @@ def invariance_ladder(y, pred, group, n_perm=N_PERM, rng=None, keep_null=False):
     within each true topic, which holds the group-by-topic composition fixed and
     realises exactly the null that the coder's response profile does not depend on
     the group. The asymptotic chi-square reference is also reported, but it is not
-    used for inference: with 21 x 21 sparse confusion tables it rejects about 60%
-    of random splits, while the permutation test holds its nominal level.
+    used for inference: with 21 x 21 sparse confusion tables it rejected 65% of random
+    half-splits of a single corpus and 71% of pooled-corpus splits
+    (results/metrics/placebo_calibration.json), while the permutation test stayed
+    close to its nominal level.
     """
     rng = PERM_RNG if rng is None else rng
     gvals, gi = np.unique(group, return_inverse=True)
@@ -253,6 +255,11 @@ def invariance_ladder(y, pred, group, n_perm=N_PERM, rng=None, keep_null=False):
             "p_asymptotic": float(stats.chi2.sf(stat, df)),
             "null_mean": float(null.mean()),
             "stat_over_null": float(stat / null.mean()),
+            # bias-corrected conditional mutual information I(code; group | topic), nats:
+            # the excess of the statistic over its null mean per item, halved. Unlike the
+            # ratio, it does not depend on how many cells the tables have.
+            "n": int(len(y)),
+            "cmi": float((stat - null.mean()) / (2 * len(y))),
             "scaled_chi2_df": float(stat / df),
             **({"_null": null} if keep_null else {})}
 

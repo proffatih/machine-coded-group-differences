@@ -11,6 +11,10 @@
         2.3282143235125035
       ],
       "combined_stat_over_null_mean": 1.2871463407708204,
+      "combined_cmi_by_grouping": {
+        "era": 0.011500491113311482,
+        "length": 0.015833214187043816
+      },
       "corpus_tests": 252,
       "corpus_rejected_share": 0.42857142857142855,
       "corpus_nonuniform_share": 0.0992063492063492,
@@ -49,6 +53,10 @@
         1.1267593154763278
       ],
       "combined_stat_over_null_mean": 1.077683359231144,
+      "combined_cmi_by_grouping": {
+        "era": 0.003292683505743728,
+        "length": 0.014180722480671983
+      },
       "corpus_tests": 28,
       "corpus_rejected_share": 0.32142857142857145,
       "corpus_nonuniform_share": 0.42857142857142855,

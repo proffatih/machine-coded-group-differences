@@ -11,6 +11,10 @@
         1.134766204399706
       ],
       "combined_stat_over_null_mean": 1.089018879620133,
+      "combined_cmi_by_grouping": {
+        "era": 0.0061747061793836966,
+        "length": 0.01215787937957986
+      },
       "corpus_tests": 28,
       "corpus_rejected_share": 0.32142857142857145,
       "corpus_nonuniform_share": 0.32142857142857145,

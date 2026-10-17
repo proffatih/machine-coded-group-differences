@@ -223,18 +223,22 @@ def table4_dif():
         non = _mean([1.0 if float(r["nonuniform_p"]) < .05 else 0.0 for r in d])
         rej = _mean([1.0 if float(r["p"]) < .05 else 0.0 for r in l])
         body.append(f"{GROUP_LABEL[g]} & {_mean(gaps):.3f} & {uni:.2f} & {non:.2f} & "
-                    f"{_mean([r['stat_over_null'] for r in l]):.2f} & {rej:.2f} \\\\")
+                    f"{_mean([r['cmi'] for r in l]):.3f} & {rej:.2f} \\\\")
     tex = r"""\begin{table}[htbp]
 \centering
 \caption{Differential item functioning and invariance of the response structure, by
-grouping variable, pooled over models and prompt conditions. The accuracy gap is the
-largest between-subgroup difference in raw agreement. The two DIF columns give the
+grouping variable. The two DIF columns give the
 share of pairwise likelihood-ratio tests significant at $p<.05$ after stratifying on
 the true topic. The invariance test compares one confusion matrix for all subgroups
-with one per subgroup; LR/null is its likelihood-ratio statistic divided by the mean of
-its permutation distribution (group labels shuffled within each true topic, 1,999
-draws), so 1 means no departure, and Rejected is the share of tests with permutation
-$p<.05$. Non-uniform DIF is near-universal while uniform DIF is not: the instrument is
+with one per subgroup; its $p$-value comes from a permutation distribution (group labels
+shuffled within each true topic, 1,999 draws), and Rejected is the share of tests with
+$p<.05$. $\hat{I}$ is the size of the departure: the excess of the likelihood-ratio
+statistic over its permutation mean, divided by twice the number of items, a
+bias-corrected estimate of the conditional mutual information between subgroup and
+assigned code given the true topic (nats; 0 means none). The accuracy gap is the largest
+between-subgroup difference in raw agreement within each coder and prompt condition (for
+venue, the range over five subgroups). All columns pool both coder families and every
+prompt condition. Non-uniform DIF is near-universal while uniform DIF is not: the instrument is
 not simply less accurate in one subgroup, it behaves differently.}
 \label{tab:dif}
 \small
@@ -242,7 +246,7 @@ not simply less accurate in one subgroup, it behaves differently.}
 \toprule
  & Accuracy & \multicolumn{2}{c}{DIF significant} & \multicolumn{2}{c}{Invariance test} \\
 \cmidrule(lr){3-4}\cmidrule(lr){5-6}
-Grouping & gap & Uniform & Non-uniform & LR/null & Rejected \\
+Grouping & gap & Uniform & Non-uniform & $\hat{I}$ & Rejected \\
 \midrule
 """ + "\n".join(body) + r"""
 \bottomrule
