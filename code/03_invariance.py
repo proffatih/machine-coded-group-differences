@@ -13,11 +13,10 @@ accuracy looks acceptable.
 Four analyses, in increasing order of what a reader has to accept:
 
   1. Conditional accuracy by subgroup, stratified on the true topic
-  2. Logistic DIF: correct ~ topic + group (uniform) and + topic x group (non-uniform),
-     tested by likelihood-ratio against the topic-only model (Swaminathan & Rogers)
-  3. An invariance ladder over the confusion matrix -- configural / metric (equal
-     per-topic recall) / scalar (equal recall and precision) -- as nested multinomial
-     models compared by LR test
+  2. Logistic DIF as nested LR tests (Swaminathan & Rogers): uniform = topic + group
+     against topic only; non-uniform = topic x group against topic + group
+  3. Invariance of the confusion structure: one pooled confusion matrix against one
+     per group, LR statistic referred to a within-topic permutation distribution
   4. The substantive cost: bias in estimated topic prevalence, and in the
      *between-subgroup difference* in prevalence, which is the quantity actually
      reported in agenda-setting research; pooled vs subgroup-specific confusion
@@ -200,39 +199,62 @@ def multinom_loglik(counts):
     return ll
 
 
-def invariance_ladder(y, pred, group):
-    """Nested tests: pooled confusion (scalar) vs per-group confusion (configural)."""
-    gvals = np.unique(group)
+N_PERM = 1999
+PERM_RNG = np.random.default_rng(20260905)
+
+
+def _g2(y, pred, gi, n_groups):
+    """Likelihood-ratio statistic for pred independent of group given the true topic.
+
+    Equals 2 x (log-likelihood with a confusion matrix per group - log-likelihood with
+    one pooled confusion matrix), i.e. the scalar-versus-configural comparison.
+    """
+    n = np.bincount((y * K + pred) * n_groups + gi,
+                    minlength=K * K * n_groups).reshape(K, K, n_groups).astype(float)
+    n_ig = n.sum(1, keepdims=True)
+    n_ij = n.sum(2, keepdims=True)
+    n_i = n.sum((1, 2), keepdims=True)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        t = n * np.log(n * n_i / (n_ig * n_ij))
+    return float(2 * np.nansum(t))
+
+
+def invariance_ladder(y, pred, group, n_perm=N_PERM, rng=None, keep_null=False):
+    """Scalar (one pooled confusion matrix) against configural (one per group).
+
+    The p-value is from a conditional permutation test: group labels are shuffled
+    within each true topic, which holds the group-by-topic composition fixed and
+    realises exactly the null that the coder's response profile does not depend on
+    the group. The asymptotic chi-square reference is also reported, but it is not
+    used for inference: with 21 x 21 sparse confusion tables it rejects about 60%
+    of random splits, while the permutation test holds its nominal level.
+    """
+    rng = PERM_RNG if rng is None else rng
+    gvals, gi = np.unique(group, return_inverse=True)
+    G = len(gvals)
+    stat = _g2(y, pred, gi, G)
+    order = np.argsort(y, kind="stable")
+    ys, g_sorted = y[order], gi[order]
+    null = np.empty(n_perm)
+    for b in range(n_perm):
+        k = np.lexsort((rng.random(len(y)), ys))      # shuffle within topic blocks
+        gp = np.empty_like(gi)
+        gp[order] = g_sorted[k]
+        null[b] = _g2(y, pred, gp, G)
     pooled = confusion(y, pred)
-    ll_pooled = 0.0
-    for g in gvals:
-        m = group == g
-        cg = confusion(y[m], pred[m])
-        # scalar model: each group's counts scored under the POOLED row profiles
-        for i in range(K):
-            n = pooled[i].sum()
-            if n == 0 or cg[i].sum() == 0:
-                continue
-            p = np.clip(pooled[i] / n, EPS, 1)
-            ll_pooled += float((cg[i] * np.log(p)).sum())
-    ll_free = sum(multinom_loglik(confusion(y[group == g], pred[group == g]))
-                  for g in gvals)
-    # df counts only cells the data can actually inform: for each true topic that
-    # occurs, the number of distinct predicted labels it ever receives, less one for
-    # the simplex constraint, times the number of extra groups. Counting all K*K
-    # cells would inflate df by the (many) structurally empty ones and make the test
-    # anticonservative in the wrong direction -- it would never reject.
     df = 0
     for i in range(K):
         if pooled[i].sum() == 0:
             continue
-        used = int((pooled[i] > 0).sum())
-        df += max(used - 1, 0)
-    df = max(df * (len(gvals) - 1), 1)
-    stat = max(2 * (ll_free - ll_pooled), 0.0)
-    return {"n_groups": int(len(gvals)), "lr_chi2": float(stat), "df": int(df),
-            "p": float(stats.chi2.sf(stat, df)),
-            "scaled_chi2_df": float(stat / df)}
+        df += max(int((pooled[i] > 0).sum()) - 1, 0)
+    df = max(df * (G - 1), 1)
+    return {"n_groups": int(G), "lr_chi2": stat, "df": int(df),
+            "p": float((1 + (null >= stat).sum()) / (n_perm + 1)),
+            "p_asymptotic": float(stats.chi2.sf(stat, df)),
+            "null_mean": float(null.mean()),
+            "stat_over_null": float(stat / null.mean()),
+            "scaled_chi2_df": float(stat / df),
+            **({"_null": null} if keep_null else {})}
 
 
 def per_topic_recall_gap(y, pred, group):
@@ -290,7 +312,15 @@ def total_variation(a, b):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--min_group_n", type=int, default=200)
+    ap.add_argument("--ann_dir", default=None, help="read shards from here (robustness runs)")
+    ap.add_argument("--out_dir", default=None, help="write results here (robustness runs)")
     args = ap.parse_args()
+    global ANN, OUT
+    if args.ann_dir:
+        ANN = os.path.abspath(args.ann_dir)
+    if args.out_dir:
+        OUT = os.path.abspath(args.out_dir)
+        os.makedirs(os.path.join(OUT, "metrics"), exist_ok=True)
 
     recs = load_all()
     if not recs:

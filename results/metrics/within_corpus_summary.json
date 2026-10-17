@@ -1,0 +1,82 @@
+{
+  "min_group_n": 100,
+  "n_corpus_tests": 280,
+  "by_family": {
+    "llm": {
+      "combined_tests": 36,
+      "combined_rejected_share": 0.9722222222222222,
+      "combined_max_p": 0.0555,
+      "combined_stat_over_null_range": [
+        1.0518388080757055,
+        2.3282143235125035
+      ],
+      "combined_stat_over_null_mean": 1.2871463407708204,
+      "corpus_tests": 252,
+      "corpus_rejected_share": 0.42857142857142855,
+      "corpus_nonuniform_share": 0.0992063492063492,
+      "corpus_uniform_share": 0.11904761904761904,
+      "groupings": [
+        "era",
+        "length"
+      ],
+      "corpora_per_grouping": {
+        "era": [
+          "uk_acts",
+          "uk_media",
+          "uk_pmqs",
+          "us_bills",
+          "us_eo",
+          "us_nyt",
+          "us_scotus"
+        ],
+        "length": [
+          "uk_acts",
+          "uk_media",
+          "uk_pmqs",
+          "us_bills",
+          "us_eo",
+          "us_nyt",
+          "us_scotus"
+        ]
+      }
+    },
+    "sup": {
+      "combined_tests": 4,
+      "combined_rejected_share": 0.5,
+      "combined_max_p": 0.146,
+      "combined_stat_over_null_range": [
+        1.0290697914512388,
+        1.1267593154763278
+      ],
+      "combined_stat_over_null_mean": 1.077683359231144,
+      "corpus_tests": 28,
+      "corpus_rejected_share": 0.32142857142857145,
+      "corpus_nonuniform_share": 0.42857142857142855,
+      "corpus_uniform_share": 0.39285714285714285,
+      "groupings": [
+        "era",
+        "length"
+      ],
+      "corpora_per_grouping": {
+        "era": [
+          "uk_acts",
+          "uk_media",
+          "uk_pmqs",
+          "us_bills",
+          "us_eo",
+          "us_nyt",
+          "us_scotus"
+        ],
+        "length": [
+          "uk_acts",
+          "uk_media",
+          "uk_pmqs",
+          "us_bills",
+          "us_eo",
+          "us_nyt",
+          "us_scotus"
+        ]
+      }
+    }
+  }
+}

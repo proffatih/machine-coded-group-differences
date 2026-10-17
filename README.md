@@ -64,6 +64,11 @@ python code/03_invariance.py           # DIF, invariance ladder, corrections -> 
 python code/07_mechanism.py            # derivation check -> results/mechanism.csv
 python code/08_uncertainty.py --boot 3000  # cluster bootstrap -> results/metrics/intervals.json
 python code/09_pilot_response_format.py    # letters vs names pilot -> results/pilot/
+python code/10_within_corpus.py        # invariance inside each corpus (same prompt, same classifier)
+python code/11_pooled_supervised.py    # one supervised classifier for all corpora, then:
+python code/03_invariance.py   --ann_dir results/annotations_pooled_sup --out_dir results/pooled_supervised
+python code/10_within_corpus.py --ann_dir results/annotations_pooled_sup --out_dir results/pooled_supervised
+python code/12_placebo_calibration.py  # false-positive rate of every test under random splits
 python code/04_figures.py              # figures/
 python code/05_tables.py               # manuscript tables
 python code/verify_claims.py           # recomputes every number stated in the paper

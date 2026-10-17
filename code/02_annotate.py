@@ -11,8 +11,9 @@ Why by name rather than by letter. An earlier version presented the topics as le
 options and read the logits over "A".."U". Small models handled that badly: they
 answered from position rather than content, piling probability onto the first few
 letters, and zero-shot accuracy sat near chance. Scoring the topic *name* instead
-raised zero-shot accuracy on the same model and corpora by a factor of three to four
-(0.10 -> 0.46 on newspaper headlines, 0.12 -> 0.32 on bill titles). The response format
+raised zero-shot accuracy for Qwen2.5 1.5B by a factor of 2.5 to 4.6 across the four
+pilot corpora (e.g. 0.10 -> 0.46 on newspaper headlines, 0.12 -> 0.32 on bill titles;
+see code/09_pilot_response_format.py and results/pilot/). The response format
 is part of the instrument, and the lettered format was measuring the wrong thing.
 
 Names are separated by their first token where that is unique, which it is for five of

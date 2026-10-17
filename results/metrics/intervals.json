@@ -20,12 +20,12 @@
   "invariance_rejected_llm": {
     "point": 1.0,
     "n_tests": 72,
-    "max_p": 1.0747214830227466e-07
+    "max_p": 0.0005
   },
   "invariance_rejected_supervised": {
     "point": 1.0,
     "n_tests": 8,
-    "max_p": 5.945023751820189e-13
+    "max_p": 0.0005
   },
   "pooled_worse_share_llm": {
     "point": 0.9786324786324786,

@@ -18,8 +18,8 @@ equation (2) predicts the pooled correction to be worse in essentially every cel
 so agreement on direction is just the observed share of worse cells.
 
 Three things are reported honestly:
-  * cells where Cbar is numerically singular, and why (a topic that is never coded in a
-    group's calibration half leaves a zero column; one with no calibration items leaves a
+  * cells where Cbar is numerically singular, and why (a topic that is never coded in the
+    calibration half of either group in the pair leaves a zero column; one with no calibration items leaves a
     zero row). Equation (2) is undefined there and those cells are not used as evidence;
   * on the well-conditioned cells, the rank correlation between predicted and observed
     error, for the uncorrected difference and for the pooled correction;

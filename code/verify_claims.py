@@ -76,7 +76,19 @@ for r in lad:
 
 chi = collections.defaultdict(list)
 for r in lad:
-    chi[("sup" if r["model"] in SUP else "llm", r["grouping"])].append(float(r["scaled_chi2_df"]))
+    chi[("sup" if r["model"] in SUP else "llm", r["grouping"])].append(float(r["stat_over_null"]))
+GR = ("country", "venue", "length", "era")
+wc = json.load(open(os.path.join(RES, "metrics", "within_corpus_summary.json")))["by_family"]
+plc = json.load(open(os.path.join(RES, "metrics", "placebo_calibration.json")))
+PS = os.path.join(RES, "pooled_supervised")
+ps_lad = list(csv.DictReader(open(os.path.join(PS, "invariance_ladder.csv"), encoding="utf-8")))
+ps_dif = list(csv.DictReader(open(os.path.join(PS, "dif_tests.csv"), encoding="utf-8")))
+ps_acc = list(csv.DictReader(open(os.path.join(PS, "corpus_accuracy.csv"), encoding="utf-8")))
+ps_prev = [r for r in csv.DictReader(open(os.path.join(PS, "prevalence_bias.csv"), encoding="utf-8")) if r["group"].startswith("DIFF:")]
+ps_wc = json.load(open(os.path.join(PS, "metrics", "within_corpus_summary.json")))["by_family"]["sup"]
+tgap = collections.defaultdict(list)
+for r in top:
+    tgap[("sup" if r["model"] in SUP else "llm", r["grouping"])].append(float(r["gap"]))
 
 lvl = collections.defaultdict(lambda: collections.defaultdict(list))
 for r in prev:
@@ -131,17 +143,11 @@ C = [
     ("topic 1 venue gap .349",           mean(tg[1]), .349, .002),
     ("llm invariance tests 72",          len(ladf["llm"]), 72, 0),
     ("sup invariance tests 8",           len(ladf["sup"]), 8, 0),
-    ("llm max p 1.1e-7",                 max(float(r["p"]) for r in ladf["llm"]) * 1e7, 1.1, .15),
-    ("sup max p 5.9e-13",                max(float(r["p"]) for r in ladf["sup"]) * 1e13, 5.9, .05),
     ("llm nonuniform .90",               mean([1.0 * x for x in dsh["llm"]["n"]]), .90, .01),
     ("sup nonuniform 1.00",              mean([1.0 * x for x in dsh["sup"]["n"]]), 1.00, .001),
     ("llm uniform .61",                  mean([1.0 * x for x in dsh["llm"]["u"]]), .61, .01),
     ("sup uniform .65",                  mean([1.0 * x for x in dsh["sup"]["u"]]), .65, .005),
     ("llm median uniform OR 1.01",       float(np.median(dsh["llm"]["or"])), 1.01, .01),
-    ("llm chi2/df min 3.4",              min(mean(chi[("llm", g)]) for g in ("country", "venue", "length", "era")), 3.4, .05),
-    ("llm chi2/df max 5.6",              max(mean(chi[("llm", g)]) for g in ("country", "venue", "length", "era")), 5.6, .05),
-    ("sup chi2/df min 1.7",              min(mean(chi[("sup", g)]) for g in ("country", "venue", "length", "era")), 1.7, .05),
-    ("sup chi2/df max 2.4",              max(mean(chi[("sup", g)]) for g in ("country", "venue", "length", "era")), 2.4, .05),
     ("phi3.5 level naive .297",          mean(lvl[("LEVEL", "phi3.5-mini")]["n"]), .297, .002),
     ("phi3.5 level group .146",          mean(lvl[("LEVEL", "phi3.5-mini")]["g"]), .146, .002),
     ("logreg level naive .066",          mean(lvl[("LEVEL", "tfidf-logreg")]["n"]), .066, .001),
@@ -186,6 +192,49 @@ C = [
     ("country gap .032 x4 < venue .142", float(4 * mean(gap["country"]) < mean(gap["venue"])), 1.0, 0),
     ("dif n min 1500",                   min(float(r["n"]) for r in dif), 1500, 0),
     ("dif n max 5250",                   max(float(r["n"]) for r in dif), 5250, 0),
+    ("perm floor p .0005 all 80 tests",  max(float(r["p"]) for r in lad), .0005, 1e-9),
+    ("llm stat/null min 2.9",            min(mean(chi[("llm", g)]) for g in GR), 2.9, .05),
+    ("llm stat/null max 4.8",            max(mean(chi[("llm", g)]) for g in GR), 4.8, .05),
+    ("sup stat/null min 1.4",            min(mean(chi[("sup", g)]) for g in GR), 1.4, .05),
+    ("sup stat/null max 2.0",            max(mean(chi[("sup", g)]) for g in GR), 2.0, .05),
+    ("llm length stat/null 4.4",         mean(chi[("llm", "length")]), 4.4, .05),
+    ("llm era stat/null 2.9",            mean(chi[("llm", "era")]), 2.9, .05),
+    ("placebo asymptotic corpus 65%",    plc["single_corpus"]["reject_asymptotic_chi2"] * 100, 65, .5),
+    ("placebo asymptotic pooled 71%",    plc["pooled_corpora"]["reject_asymptotic_chi2"] * 100, 71, .5),
+    ("placebo perm corpus 4.5%",         plc["single_corpus"]["reject_permutation"] * 100, 4.5, .05),
+    ("placebo perm pooled 8%",           plc["pooled_corpora"]["reject_permutation"] * 100, 8, .5),
+    ("placebo DIF min 4%",               100 * min(plc[k][f] for k in ("single_corpus", "pooled_corpora") for f in ("reject_dif_uniform", "reject_dif_nonuniform")), 4, .5),
+    ("placebo DIF max 7%",               100 * max(plc[k][f] for k in ("single_corpus", "pooled_corpora") for f in ("reject_dif_uniform", "reject_dif_nonuniform")), 7, .5),
+    ("within llm 36 tests",              wc["llm"]["combined_tests"], 36, 0),
+    ("within llm 35 rejected",           wc["llm"]["combined_rejected_share"] * 36, 35, .01),
+    ("within llm max p .056",            wc["llm"]["combined_max_p"], .056, .001),
+    ("within llm ratio min 1.05",        wc["llm"]["combined_stat_over_null_range"][0], 1.05, .005),
+    ("within llm ratio max 2.33",        wc["llm"]["combined_stat_over_null_range"][1], 2.33, .005),
+    ("within llm ratio mean 1.29",       wc["llm"]["combined_stat_over_null_mean"], 1.29, .005),
+    ("within sup 2 of 4 rejected",       wc["sup"]["combined_rejected_share"] * 4, 2, .01),
+    ("within sup ratio min 1.03",        wc["sup"]["combined_stat_over_null_range"][0], 1.03, .005),
+    ("within sup ratio max 1.13",        wc["sup"]["combined_stat_over_null_range"][1], 1.13, .005),
+    ("pooled-sup acc logreg .651",       mean([r["accuracy"] for r in ps_acc if r["model"] == "tfidf-logreg-pooled"]), .651, .001),
+    ("pooled-sup acc svm .650",          mean([r["accuracy"] for r in ps_acc if r["model"] == "tfidf-svm-pooled"]), .650, .001),
+    ("pooled-sup 8 tests",               len(ps_lad), 8, 0),
+    ("pooled-sup all p .0005",           max(float(r["p"]) for r in ps_lad), .0005, 1e-9),
+    ("pooled-sup ratio min 1.4",         min(float(r["stat_over_null"]) for r in ps_lad), 1.4, .05),
+    ("pooled-sup ratio max 2.0",         max(float(r["stat_over_null"]) for r in ps_lad), 2.0, .05),
+    ("pooled-sup nonuniform 92%",        100 * np.mean([float(r["nonuniform_p"]) < .05 for r in ps_dif]), 92, .5),
+    ("pooled-sup within 4/4",            ps_wc["combined_rejected_share"] * 4, 4, .01),
+    ("pooled-sup within max p .045",     ps_wc["combined_max_p"], .045, .001),
+    ("pooled-sup pooled corr worse 100%", 100 * np.mean([float(r["tv_pooled_correction"]) > float(r["tv_naive"]) for r in ps_prev]), 100, .01),
+    ("pooled-sup pooled excess .140",    np.mean([float(r["tv_pooled_correction"]) - float(r["tv_naive"]) for r in ps_prev]), .140, .001),
+    ("sup topic gap min .12",            min(mean(tgap[("sup", g)]) for g in GR), .12, .005),
+    ("sup topic gap max .34",            max(mean(tgap[("sup", g)]) for g in GR), .34, .005),
+    ("llm topic gap min .07",            min(mean(tgap[("llm", g)]) for g in GR), .07, .005),
+    ("llm topic gap max .23",            max(mean(tgap[("llm", g)]) for g in GR), .23, .005),
+    ("sup topic gap > llm every grouping", float(all(mean(tgap[("sup", g)]) > mean(tgap[("llm", g)]) for g in GR)), 1, 0),
+    ("pooled minus subgroup excess sup ~.05", iv["pooled_excess_error_supervised"]["point"] - iv["subgroup_excess_error_supervised"]["point"], .05, .005),
+    ("five-shot lowers 5 of 6 LLMs",     float(sum(mean(by_mc[(m, "fs")]) < mean(by_mc[(m, "zs")]) for m in LLM)), 5, 0),
+    ("smollm zs .074",                   mean(by_mc[("smollm2-1.7b", "zs")]), .074, .001),
+    ("smollm fs .101",                   mean(by_mc[("smollm2-1.7b", "fs")]), .101, .001),
+    ("phi most accurate LLM (zs)",       float(max(LLM, key=lambda m: mean(by_mc[(m, "zs")])) == "phi3.5-mini"), 1, 0),
 ]
 
 bad = 0
