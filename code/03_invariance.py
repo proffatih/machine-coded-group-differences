@@ -126,40 +126,42 @@ def dif_lr_tests(correct, topic, group):
     ll0, df0 = _mnl_loglik_saturated(correct, topic)
     ll2, df2 = _mnl_loglik_saturated(correct, topic, group)
 
-    # M1 by one-dimensional search over the group log-odds offset (2 groups only)
+    # M1: topic intercepts plus one group shift on the log-odds scale (2 groups only).
+    # The likelihood depends on the data only through successes and trials per
+    # topic-by-group cell, so the fit runs on those counts. For a given shift beta each
+    # topic intercept is profiled out by a vectorised bisection (same [-12, 12] bounds
+    # as before), and the profile likelihood is maximised over beta in [-6, 6]. This is
+    # the same estimator as the earlier per-topic loop, computed on arrays instead.
     gvals = np.unique(group)
     if len(gvals) == 2:
+        from scipy.optimize import minimize_scalar
         ref = gvals[0]
         tvals = np.unique(topic)
+        g1 = (group != ref)
+        n0 = np.array([np.sum((topic == t) & ~g1) for t in tvals], float)
+        n1 = np.array([np.sum((topic == t) & g1) for t in tvals], float)
+        s0 = np.array([correct[(topic == t) & ~g1].sum() for t in tvals], float)
+        s1 = np.array([correct[(topic == t) & g1].sum() for t in tvals], float)
+
+        def profile_a(beta):
+            lo, hi = np.full(len(tvals), -12.0), np.full(len(tvals), 12.0)
+            for _ in range(60):
+                a = (lo + hi) / 2
+                score = (s0 + s1) - n0 / (1 + np.exp(-a)) - n1 / (1 + np.exp(-(a + beta)))
+                up = score > 0
+                lo = np.where(up, a, lo); hi = np.where(up, hi, a)
+            return (lo + hi) / 2
 
         def nll(beta):
-            tot = 0.0
-            for t in tvals:
-                mt = topic == t
-                # profile the topic intercept out numerically
-                a_lo, a_hi = -12.0, 12.0
-                for _ in range(60):
-                    a = (a_lo + a_hi) / 2
-                    eta = a + beta * (group[mt] != ref)
-                    p = 1 / (1 + np.exp(-eta))
-                    if (correct[mt] - p).sum() > 0:
-                        a_lo = a
-                    else:
-                        a_hi = a
-                a = (a_lo + a_hi) / 2
-                eta = a + beta * (group[mt] != ref)
-                p = np.clip(1 / (1 + np.exp(-eta)), EPS, 1 - EPS)
-                tot += (correct[mt] * np.log(p) + (1 - correct[mt]) * np.log(1 - p)).sum()
-            return -tot
+            a = profile_a(beta)
+            p0 = np.clip(1 / (1 + np.exp(-a)), EPS, 1 - EPS)
+            p1 = np.clip(1 / (1 + np.exp(-(a + beta))), EPS, 1 - EPS)
+            return -float((s0 * np.log(p0) + (n0 - s0) * np.log(1 - p0)
+                           + s1 * np.log(p1) + (n1 - s1) * np.log(1 - p1)).sum())
 
-        b_lo, b_hi = -6.0, 6.0
-        for _ in range(80):
-            m1, m2 = b_lo + (b_hi - b_lo) / 3, b_hi - (b_hi - b_lo) / 3
-            if nll(m1) < nll(m2):
-                b_hi = m2
-            else:
-                b_lo = m1
-        beta = (b_lo + b_hi) / 2
+        opt = minimize_scalar(nll, bounds=(-6.0, 6.0), method="bounded",
+                              options={"xatol": 1e-9})
+        beta = float(opt.x)
         ll1 = -nll(beta)
         df1 = df0 + 1
     else:

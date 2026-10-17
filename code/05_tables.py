@@ -88,15 +88,20 @@ def table2_models():
         developer = repo.split("/")[0]
         rows.append((repo.split("/")[1], developer,
                      "4-bit NF4" if prec == "nf4" else "fp16"))
-    body = "\n".join(f"\\texttt{{{m}}} & {d} & {p} \\\\" for m, d, p in rows)
+    rows.append(("TF-IDF + logistic regression", "scikit-learn", "supervised, fp64"))
+    rows.append(("TF-IDF + calibrated linear SVM", "scikit-learn", "supervised, fp64"))
+    body = "\n".join(
+        (f"\\texttt{{{m}}} & {d} & {p} \\\\" if "TF-IDF" not in m
+         else f"{m} & {d} & {p} \\\\") for m, d, p in rows)
     tex = r"""\begin{table}[htbp]
 \centering
-\caption{The six open-weight instruction-tuned models, from five independent
-developers. Gated releases (Llama, Gemma) were excluded so that the full pipeline can
-be reproduced without credentials. Models above roughly two billion parameters are
-loaded in 4-bit NF4 quantisation, which is the realistic deployment condition on the
-single consumer GPU used here; the quantisation is reported because it is part of the
-instrument being measured.}
+\caption{The eight coders. Six are open-weight instruction-tuned language models from
+five independent developers; two are supervised classifiers trained on the
+researcher's own labels. Gated releases (Llama, Gemma) were excluded so that the full pipeline can
+be reproduced without credentials. All six language models are loaded in 4-bit NF4
+quantisation, held constant across the roster so that a difference between models cannot
+be an artefact of one being quantised and another not; it is also the realistic
+deployment condition on the single consumer GPU used here.}
 \label{tab:models}
 \small
 \begin{tabular}{lll}
@@ -150,6 +155,8 @@ MODEL_LABEL = {
     "smollm2-1.7b": "SmolLM2 1.7B", "olmo2-1b": "OLMo-2 1B",
     "granite3.1-2b": "Granite 3.1 2B", "qwen2.5-1.5b": "Qwen2.5 1.5B",
     "qwen2.5-3b": "Qwen2.5 3B", "phi3.5-mini": "Phi-3.5-mini 3.8B",
+    "tfidf-logreg": "TF-IDF + logistic regression",
+    "tfidf-svm": "TF-IDF + calibrated SVM",
 }
 GROUP_LABEL = {"country": "Country", "venue": "Institutional venue",
                "length": "Text length", "era": "Period"}
@@ -162,17 +169,28 @@ def table3_accuracy():
     by = {}
     for r in rows:
         by.setdefault((r["model"], r["condition"]), []).append(r["accuracy"])
-    models = sorted({m for m, _ in by}, key=lambda m: _mean(by.get((m, "zs"), [0])))
+    # language models first, ordered by zero-shot agreement; supervised coders after,
+    # since they are a different family rather than a further rung of the same ladder
+    lms = sorted({m for m, c in by if c != "sup"}, key=lambda m: _mean(by.get((m, "zs"), [0])))
+    sup = sorted({m for m, c in by if c == "sup"}, key=lambda m: _mean(by[(m, "sup")]))
+    models = lms + sup
     body = []
     for m in models:
-        cells = " & ".join(f"{_mean(by.get((m, c), [])):.3f}" for c in ("zs", "cb", "fs"))
+        if (m, "sup") in by:          # supervised coders have a single condition
+            cells = f"\\multicolumn{{3}}{{c}}{{{_mean(by[(m, 'sup')]):.3f}}}"
+        else:
+            cells = " & ".join(f"{_mean(by.get((m, c), [])):.3f}" for c in ("zs", "cb", "fs"))
+        if m == sup[0] if sup else False:
+            body.append("\\midrule")
         body.append(f"{MODEL_LABEL.get(m, m)} & {cells} \\\\")
     tex = r"""\begin{table}[htbp]
 \centering
-\caption{Agreement with the human CAP code, averaged over the seven corpora, by model
-and prompt condition. Chance is .048. The three conditions are zero-shot, zero-shot
-with codebook definitions appended to each topic, and five-shot with examples drawn
-from the corpus's own calibration half.}
+\caption{Agreement with the human CAP code, averaged over the seven corpora, by coder and
+prompt condition. Chance is .048. The three prompt conditions apply to the language
+models only: zero-shot, zero-shot with codebook definitions appended to each topic,
+and five-shot with examples drawn from the corpus's own calibration half. The
+supervised coders are trained by five-fold cross-fitting within each corpus, so every
+item is predicted by a model that did not see it; they have a single condition.}
 \label{tab:accuracy}
 \small
 \begin{tabular}{lrrr}
@@ -213,7 +231,7 @@ grouping variable, pooled over models and prompt conditions. The accuracy gap is
 largest between-subgroup difference in raw agreement. The two DIF columns give the
 share of pairwise likelihood-ratio tests significant at $p<.05$ after stratifying on
 the true topic. Non-uniform DIF is near-universal while uniform DIF is not: the
-instrument is not simply harder in one subgroup, it behaves differently.}
+instrument is not simply less accurate in one subgroup, it behaves differently.}
 \label{tab:dif}
 \small
 \begin{tabular}{lrrrrr}
@@ -255,19 +273,22 @@ def table5_correction():
     tex = r"""\begin{table}[htbp]
 \centering
 \caption{Total-variation error of estimated topic prevalence against the human coding,
-uncorrected and after inverting a confusion matrix estimated on the held-out
-calibration half. Left: the prevalence of a single subgroup. Right: the
-\emph{difference} in prevalence between two subgroups, which is the quantity
-agenda-setting research reports. A pooled correction is worse than no correction at
-all on every model, and a subgroup-specific correction repays its estimation cost only
-for the two most accurate models.}
+uncorrected and after correcting with a confusion matrix estimated on the held-out
+calibration half (non-negative least-squares inversion). Acc.\ is agreement with the
+human code averaged over corpora and prompt conditions. Left: the prevalence of a single
+subgroup. Right: the \emph{difference} in prevalence between two subgroups, which is the
+quantity agenda-setting research reports. On the difference, a pooled correction is worse
+than no correction for every coder. A subgroup-specific correction usually beats the
+pooled one but is not reliably better than leaving the estimate alone, and for the
+supervised coders it is clearly worse.}
 \label{tab:correction}
-\small
+\footnotesize
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lrrrrrrr}
 \toprule
  & & \multicolumn{3}{c}{Single subgroup} & \multicolumn{3}{c}{Between-subgroup difference} \\
 \cmidrule(lr){3-5}\cmidrule(lr){6-8}
-Model & Accuracy & None & Pooled & Subgroup & None & Pooled & Subgroup \\
+Coder & Acc. & None & Pooled & Subgr. & None & Pooled & Subgr. \\
 \midrule
 """ + "\n".join(body) + r"""
 \bottomrule

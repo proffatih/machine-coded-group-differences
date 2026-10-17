@@ -59,9 +59,14 @@ subgroups and contaminate the invariance test.
 python -m venv .venv && ./.venv/bin/pip install -r requirements.txt
 python code/01_prepare_corpora.py      # downloads CAP, rebuilds data/
 bash   code/run_all.sh                 # 6 models x 3 conditions x 7 corpora, resumable
-python code/03_invariance.py           # analysis -> results/
+python code/06_supervised_baseline.py # TF-IDF coders, 5-fold cross-fitting -> results/annotations/
+python code/03_invariance.py           # DIF, invariance ladder, corrections -> results/
+python code/07_mechanism.py            # derivation check -> results/mechanism.csv
+python code/08_uncertainty.py --boot 3000  # cluster bootstrap -> results/metrics/intervals.json
+python code/09_pilot_response_format.py    # letters vs names pilot -> results/pilot/
 python code/04_figures.py              # figures/
 python code/05_tables.py               # manuscript tables
+python code/verify_claims.py           # recomputes every number stated in the paper
 ```
 
 `code/test_invariance_smoke.py` injects a known invariance violation into synthetic

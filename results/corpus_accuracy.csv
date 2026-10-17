@@ -125,3 +125,17 @@ smollm2-1.7b,zs,us_bills,750,0.07333333333333333
 smollm2-1.7b,zs,us_eo,750,0.036
 smollm2-1.7b,zs,us_nyt,750,0.048
 smollm2-1.7b,zs,us_scotus,750,0.028
+tfidf-logreg,sup,uk_acts,750,0.6506666666666666
+tfidf-logreg,sup,uk_media,750,0.47333333333333333
+tfidf-logreg,sup,uk_pmqs,750,0.6506666666666666
+tfidf-logreg,sup,us_bills,750,0.676
+tfidf-logreg,sup,us_eo,750,0.664
+tfidf-logreg,sup,us_nyt,750,0.488
+tfidf-logreg,sup,us_scotus,750,0.6666666666666666
+tfidf-svm,sup,uk_acts,750,0.6706666666666666
+tfidf-svm,sup,uk_media,750,0.464
+tfidf-svm,sup,uk_pmqs,750,0.668
+tfidf-svm,sup,us_bills,750,0.6826666666666666
+tfidf-svm,sup,us_eo,750,0.6626666666666666
+tfidf-svm,sup,us_nyt,750,0.49866666666666665
+tfidf-svm,sup,us_scotus,750,0.6586666666666666

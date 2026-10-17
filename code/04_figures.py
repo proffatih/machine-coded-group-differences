@@ -23,7 +23,9 @@ FIG = os.path.join(ROOT, "figures")
 os.makedirs(FIG, exist_ok=True)
 
 plt.rcParams.update({
-    "figure.dpi": 300, "savefig.dpi": 300, "savefig.bbox": "tight",
+    # CMM kilavuzu: line art 1200 dpi, GRI TON 600 dpi, renkli 300 dpi.
+    # Tum sekiller gri ton -> 600 dpi.
+    "figure.dpi": 600, "savefig.dpi": 600, "savefig.bbox": "tight",
     "font.size": 8, "axes.titlesize": 9, "axes.labelsize": 8,
     "legend.fontsize": 7, "xtick.labelsize": 7, "ytick.labelsize": 7,
     "axes.spines.top": False, "axes.spines.right": False,
@@ -74,30 +76,42 @@ def read_csv(name):
 
 
 def fig2_accuracy_by_subgroup(acc):
-    """Raw vs topic-standardised accuracy: how much of a subgroup gap is just topic mix."""
+    """Raw vs topic-standardised accuracy: how much of a subgroup gap is just topic mix.
+
+    The legend sits above the panels rather than inside an axis, because inside any
+    panel it lands on top of bars; venue labels are written out in full and the venue
+    panel is given more width than the two-level panels.
+    """
     if not acc:
         return
+    pretty = {"legislative_oral": "legislative\n(oral)", "legislative": "legislative",
+              "media": "media", "executive": "executive", "judicial": "judicial",
+              "US": "US", "UK": "UK", "long": "long", "short": "short",
+              "earlier": "earlier", "later": "later"}
     groupings = sorted({r["grouping"] for r in acc})
-    fig, axes = plt.subplots(1, len(groupings), figsize=(2.4 * len(groupings), 2.6),
-                             sharey=True)
+    widths = [2.6 if g == "venue" else 1.0 for g in groupings]
+    fig, axes = plt.subplots(1, len(groupings), figsize=(7.4, 3.0), sharey=True,
+                             gridspec_kw={"width_ratios": widths})
     axes = np.atleast_1d(axes)
     for ax, gn in zip(axes, groupings):
         sub = [r for r in acc if r["grouping"] == gn]
         labs = sorted({r["group"] for r in sub})
-        x = np.arange(len(labs)); w = 0.36
+        x = np.arange(len(labs)); w = 0.38
         raw = [np.mean([r["accuracy"] for r in sub if r["group"] == g]) for g in labs]
         std = [np.mean([r["topic_standardised_accuracy"] for r in sub if r["group"] == g])
                for g in labs]
         ax.bar(x - w / 2, raw, w, label="raw", color="0.35", edgecolor="black", linewidth=0.4)
-        ax.bar(x + w / 2, std, w, label="topic-standardised", color="0.75",
+        ax.bar(x + w / 2, std, w, label="topic-standardised", color="0.80",
                edgecolor="black", linewidth=0.4, hatch="//")
-        ax.set_xticks(x); ax.set_xticklabels(labs, rotation=30, ha="right")
+        ax.set_xticks(x)
+        ax.set_xticklabels([pretty.get(g, g) for g in labs], rotation=0, fontsize=6.5)
         ax.set_title(GROUP_LABEL.get(gn, gn))
-    axes[0].set_ylabel("accuracy")
-    axes[0].legend(frameon=False, loc="lower left")
-    fig.suptitle("Subgroup accuracy before and after standardising the topic mix", y=1.04)
+        ax.set_xlim(-0.6, len(labs) - 0.4)
+    axes[0].set_ylabel("agreement with human code")
+    h, l = axes[0].get_legend_handles_labels()
+    fig.legend(h, l, loc="upper center", ncol=2, frameon=False, bbox_to_anchor=(0.5, 1.06))
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
     fig.savefig(os.path.join(FIG, "fig2_subgroup_accuracy.png")); plt.close(fig)
-
 
 def fig3_topic_gap_heatmap(topic_rows):
     """The main figure: where in the codebook the instrument stops behaving the same."""
@@ -202,6 +216,56 @@ def fig5_ladder(ladder):
     fig.savefig(os.path.join(FIG, "fig5_invariance_ladder.png")); plt.close(fig)
 
 
+def fig7_capability_threshold(prev, cacc):
+    """Does the correction pay off? Plot its benefit against the instrument's accuracy.
+
+    This is the model comparison made visible. Each model contributes one point per
+    grouping; the vertical axis is how much the correction improves (positive) or
+    damages (negative) the between-subgroup difference relative to leaving it alone.
+    The pooled correction sits below zero at every accuracy level. The
+    subgroup-specific one is less damaging as accuracy rises but only reaches
+    break-even at the top -- and not monotonically, which is the point: a
+    practitioner cannot read off from an accuracy figure whether correcting is safe.
+    """
+    if not (prev and cacc):
+        return
+    acc = {}
+    for r in cacc:
+        acc.setdefault(r["model"], []).append(float(r["accuracy"]))
+    acc = {k: float(np.mean(v)) for k, v in acc.items()}
+
+    pts = {"pooled": [], "subgroup": []}
+    for r in prev:
+        if not str(r["group"]).startswith("DIFF:"):
+            continue
+        a = acc.get(r["model"])
+        if a is None or r["tv_naive"] is None:
+            continue
+        n = float(r["tv_naive"])
+        pts["pooled"].append((a, n - float(r["tv_pooled_correction"])))
+        pts["subgroup"].append((a, n - float(r["tv_group_correction"])))
+
+    fig, ax = plt.subplots(figsize=(5.0, 3.2))
+    style = {"pooled": ("pooled correction", "s", "0.55"),
+             "subgroup": ("subgroup-specific correction", "o", "0.15")}
+    for key, (lab, mk, col) in style.items():
+        xs = sorted({round(x, 4) for x, _ in pts[key]})
+        med = [np.median([y for a, y in pts[key] if round(a, 4) == x]) for x in xs]
+        ax.scatter([x for x, _ in pts[key]], [y for _, y in pts[key]],
+                   s=12, marker=mk, facecolor="none", edgecolor=col,
+                   linewidth=0.6, alpha=.55)
+        ax.plot(xs, med, marker=mk, color=col, linewidth=1.4, markersize=5, label=lab)
+    ax.axhline(0, color="black", lw=0.9)
+    ax.text(0.01, 0, "correction breaks even", fontsize=6, va="center", ha="left",
+            color="0.25", transform=ax.get_yaxis_transform(), zorder=5,
+            bbox=dict(boxstyle="square,pad=0.15", facecolor="white", edgecolor="none"))
+    ax.set_xlabel("agreement with the human code (mean over corpora)")
+    ax.set_ylabel("improvement over no correction\n(between-subgroup difference)")
+    ax.set_title("Benefit of correcting, against instrument accuracy")
+    ax.legend(frameon=False, loc="lower right")
+    fig.savefig(os.path.join(FIG, "fig7_capability_threshold.png")); plt.close(fig)
+
+
 def main():
     acc = read_csv("subgroup_accuracy.csv")
     dif = read_csv("dif_tests.csv")
@@ -215,6 +279,7 @@ def main():
     fig4_dif_tests(dif)
     fig5_ladder(ladder)
     fig6_inference_cost(prev)
+    fig7_capability_threshold(prev, read_csv("corpus_accuracy.csv"))
     made = sorted(f for f in os.listdir(FIG) if f.endswith(".png"))
     print(f"{len(made)} sekil yazildi -> figures/")
     for f in made:

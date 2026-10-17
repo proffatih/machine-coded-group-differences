@@ -1,0 +1,41 @@
+{
+  "n_cells": 260,
+  "n_singular": 152,
+  "singular_with_zero_columns": 152,
+  "singular_with_zero_rows": 55,
+  "n_well_conditioned": 108,
+  "sv_tolerance": 1e-06,
+  "share_predicted_pooled_worse_well": 1.0,
+  "share_observed_pooled_worse_exact_well": 1.0,
+  "share_observed_pooled_worse_nnls_all": 1.0,
+  "spearman_naive_pred_vs_obs": [
+    0.991899777334693,
+    8.002846516249598e-97
+  ],
+  "spearman_pooled_pred_vs_obs_exact": [
+    0.944125296521764,
+    6.569572422926114e-53
+  ],
+  "spearman_excess_pred_vs_obs_exact": [
+    0.9392570998504292,
+    4.8404024114024556e-51
+  ],
+  "spearman_pooled_pred_vs_obs_nnls": [
+    0.8519725246982384,
+    1.476065012989025e-31
+  ],
+  "median_abs_rel_error_pooled": 0.10907022601145878,
+  "median_amplification_well": 59.67167872556319,
+  "spearman_log_amplification_vs_accuracy": [
+    -0.42757341483135014,
+    3.923573120729522e-06
+  ],
+  "models_in_well": [
+    "granite3.1-2b",
+    "phi3.5-mini",
+    "qwen2.5-1.5b",
+    "qwen2.5-3b",
+    "tfidf-logreg",
+    "tfidf-svm"
+  ]
+}

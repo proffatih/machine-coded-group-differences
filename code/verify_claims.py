@@ -1,21 +1,29 @@
 #!/usr/bin/env python3
-"""Check every numeric claim in the manuscript against the analysis artefacts.
+"""Recompute every numeric claim in the manuscript from the analysis artefacts.
 
-Numbers in a paper drift: a figure is regenerated, a table changes, the prose does not.
-This recomputes each claim from results/ and compares it to what the manuscript says.
-A mismatch is reported with both values so it can be fixed rather than argued about.
+Numbers drift when a figure is regenerated or a table changes and the prose is not
+updated with it. This recomputes each claim and reports the computed and stated values
+side by side so a mismatch is fixed rather than argued about. It is run until it prints
+zero mismatches.
 
 Usage: python code/verify_claims.py
 """
-import csv, json, os, re, sys, collections
+import csv, json, os, sys, collections, itertools
 import numpy as np
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+RES = os.path.join(ROOT, "results")
+if not os.path.isdir(RES):  # author working copy keeps results beside the paper folder
+    RES = os.path.join(os.path.dirname(ROOT), "Social_Science_Computer_Review", "results")
+
+LLM = {"olmo2-1b", "qwen2.5-1.5b", "smollm2-1.7b",
+       "granite3.1-2b", "qwen2.5-3b", "phi3.5-mini"}
+SUP = {"tfidf-logreg", "tfidf-svm"}
 
 
-def rd(name):
-    with open(os.path.join(ROOT, "results", name), encoding="utf-8") as fh:
-        return list(csv.DictReader(fh))
+def rd(n):
+    return list(csv.DictReader(open(os.path.join(RES, n), encoding="utf-8")))
 
 
 def mean(xs):
@@ -23,115 +31,168 @@ def mean(xs):
     return float(np.mean(xs)) if xs else float("nan")
 
 
-acc = rd("subgroup_accuracy.csv")
-dif = rd("dif_tests.csv")
-lad = rd("invariance_ladder.csv")
-top = rd("per_topic_recall_gaps.csv")
-prev = rd("prevalence_bias.csv")
-head = json.load(open(os.path.join(ROOT, "results", "metrics", "headline.json"),
-                     encoding="utf-8"))
+cacc, lad, dif = rd("corpus_accuracy.csv"), rd("invariance_ladder.csv"), rd("dif_tests.csv")
+sg, top, prev = rd("subgroup_accuracy.csv"), rd("per_topic_recall_gaps.csv"), rd("prevalence_bias.csv")
+iv = json.load(open(os.path.join(RES, "metrics", "intervals.json")))
+mech = json.load(open(os.path.join(RES, "metrics", "mechanism_summary.json")))
 
-# accuracy is read from corpus_accuracy.csv -- the same file Table 3 uses, so the
-# table and the prose cannot disagree
-cacc = rd("corpus_accuracy.csv")
 by_mc = collections.defaultdict(list)
 for r in cacc:
     by_mc[(r["model"], r["condition"])].append(r["accuracy"])
 
-# raw - standardised, by grouping
+fam_acc = {}
+for fam, mem in (("llm", LLM), ("sup", SUP)):
+    fam_acc[fam] = mean([r["accuracy"] for r in cacc
+                         if r["model"] in mem and r["condition"] in ("zs", "sup")])
+
 std = collections.defaultdict(list)
-for r in acc:
+for r in sg:
     std[r["grouping"]].append(abs(float(r["raw_minus_standardised"])))
 
-# accuracy gap by grouping
+cells = collections.defaultdict(dict)
+for r in sg:
+    cells[(r["model"], r["condition"], r["grouping"])][r["group"]] = float(r["accuracy"])
 gap = collections.defaultdict(list)
-tmp = collections.defaultdict(dict)
-for r in acc:
-    tmp[(r["model"], r["condition"], r["grouping"])][r["group"]] = float(r["accuracy"])
-for (m, c, g), v in tmp.items():
+for (m, c, g), v in cells.items():
     if len(v) > 1:
         gap[g].append(max(v.values()) - min(v.values()))
 
-# DIF shares
-dsh = collections.defaultdict(lambda: collections.defaultdict(list))
-for r in dif:
-    dsh[r["grouping"]]["u"].append(float(r["uniform_p"]) < .05)
-    dsh[r["grouping"]]["n"].append(float(r["nonuniform_p"]) < .05)
-
-# scaled chi2
-chi = collections.defaultdict(list)
-for r in lad:
-    chi[r["grouping"]].append(float(r["scaled_chi2_df"]))
-
-# per-topic venue gaps
 tg = collections.defaultdict(list)
 for r in top:
     if r["grouping"] == "venue":
         tg[int(r["topic"])].append(float(r["gap"]))
 
-# prevalence
-pv = collections.defaultdict(lambda: collections.defaultdict(list))
+dsh = collections.defaultdict(lambda: collections.defaultdict(list))
+for r in dif:
+    fam = "sup" if r["model"] in SUP else "llm"
+    dsh[fam]["u"].append(float(r["uniform_p"]) < .05)
+    dsh[fam]["n"].append(float(r["nonuniform_p"]) < .05)
+    if r["uniform_or"]:
+        dsh[fam]["or"].append(float(r["uniform_or"]))
+
+ladf = collections.defaultdict(list)
+for r in lad:
+    ladf["sup" if r["model"] in SUP else "llm"].append(r)
+
+chi = collections.defaultdict(list)
+for r in lad:
+    chi[("sup" if r["model"] in SUP else "llm", r["grouping"])].append(float(r["scaled_chi2_df"]))
+
+lvl = collections.defaultdict(lambda: collections.defaultdict(list))
 for r in prev:
     k = "DIFF" if r["group"].startswith("DIFF:") else "LEVEL"
-    pv[(k, r["model"])]["n"].append(float(r["tv_naive"]))
-    pv[(k, r["model"])]["p"].append(float(r["tv_pooled_correction"]))
-    pv[(k, r["model"])]["g"].append(float(r["tv_group_correction"]))
-worse = collections.defaultdict(list)
+    lvl[(k, r["model"])]["n"].append(float(r["tv_naive"]))
+    lvl[(k, r["model"])]["g"].append(float(r["tv_group_correction"]))
+
+lvl2 = collections.defaultdict(lambda: collections.defaultdict(list))
 for r in prev:
-    k = "DIFF" if r["group"].startswith("DIFF:") else "LEVEL"
-    worse[k].append(float(r["tv_pooled_correction"]) > float(r["tv_naive"]))
+    if r["group"].startswith("DIFF:"):
+        lvl2[r["model"]]["n"].append(float(r["tv_naive"])); lvl2[r["model"]]["p"].append(float(r["tv_pooled_correction"]))
 
-CLAIMS = [
-    ("chance rate .048", 1 / 21, .048, .001),
-    ("SmolLM2 zero-shot .074", mean(by_mc[("smollm2-1.7b", "zs")]), .074, .002),
-    ("OLMo-2 zero-shot .22", mean(by_mc[("olmo2-1b", "zs")]), .223, .002),
-    ("OLMo-2 codebook .231", mean(by_mc[("olmo2-1b", "cb")]), .231, .002),
-    ("OLMo-2 five-shot .105", mean(by_mc[("olmo2-1b", "fs")]), .105, .002),
-    ("Qwen2.5-3B zero-shot .470", mean(by_mc[("qwen2.5-3b", "zs")]), .470, .002),
-    ("Qwen2.5-3B codebook .502", mean(by_mc[("qwen2.5-3b", "cb")]), .502, .002),
-    ("std diff country .018", mean(std["country"]), .018, .002),
-    ("std diff era .014", mean(std["era"]), .014, .002),
-    ("std diff length .023", mean(std["length"]), .023, .002),
-    ("std diff venue .041", mean(std["venue"]), .041, .002),
-    ("accuracy gap venue .137", mean(gap["venue"]), .137, .002),
-    ("accuracy gap country .032", mean(gap["country"]), .032, .002),
-    ("accuracy gap period .026", mean(gap["era"]), .026, .002),
-    ("venue worst gap .265", max(gap["venue"]), .265, .002),
-    ("chi2/df period 3.4", mean(chi["era"]), 3.4, .05),
-    ("chi2/df country 5.6", mean(chi["country"]), 5.6, .05),
-    ("invariance rejected 100%", head["invariance_rejected_share"], 1.0, 1e-9),
-    ("topic 20 venue gap .458", mean(tg[20]), .458, .002),
-    ("topic 10 venue gap .452", mean(tg[10]), .452, .002),
-    ("topic 12 venue gap .367", mean(tg[12]), .367, .002),
-    ("topic 1 venue gap .354", mean(tg[1]), .354, .002),
-    ("phi3.5 level naive .297", mean(pv[("LEVEL", "phi3.5-mini")]["n"]), .297, .002),
-    ("phi3.5 level group .146", mean(pv[("LEVEL", "phi3.5-mini")]["g"]), .146, .002),
-    ("phi3.5 diff naive .308", mean(pv[("DIFF", "phi3.5-mini")]["n"]), .308, .002),
-    ("phi3.5 diff pooled .530", mean(pv[("DIFF", "phi3.5-mini")]["p"]), .530, .002),
-    ("phi3.5 diff group .233", mean(pv[("DIFF", "phi3.5-mini")]["g"]), .233, .002),
-    ("qwen3b diff naive .304", mean(pv[("DIFF", "qwen2.5-3b")]["n"]), .304, .002),
-    ("qwen3b diff pooled .466", mean(pv[("DIFF", "qwen2.5-3b")]["p"]), .466, .002),
-    ("smollm2 diff naive .645", mean(pv[("DIFF", "smollm2-1.7b")]["n"]), .645, .002),
-    ("smollm2 diff pooled 1.067", mean(pv[("DIFF", "smollm2-1.7b")]["p"]), 1.067, .002),
-    ("pooled worse on DIFF 97.9%", float(np.mean(worse["DIFF"])) * 100, 97.9, .1),
-    ("pooled worse on LEVEL 42.4%", float(np.mean(worse["LEVEL"])) * 100, 42.4, .1),
-]
+pil = list(csv.DictReader(open(os.path.join(RES, "pilot", "response_format_pilot.csv"), encoding="utf-8")))
 
-# DIF shares stated as ranges in the text
-dif_u = [mean([1.0 if x else 0.0 for x in dsh[g]["u"]]) for g in dsh]
-dif_n = [mean([1.0 if x else 0.0 for x in dsh[g]["n"]]) for g in dsh]
-CLAIMS += [
-    ("non-uniform DIF min 89%", min(dif_n) * 100, 89, 1.0),
-    ("non-uniform DIF max 94%", max(dif_n) * 100, 94, 1.0),
-    ("uniform DIF min 44%", min(dif_u) * 100, 44, 1.0),
-    ("uniform DIF max 63%", max(dif_u) * 100, 63, 1.0),
+C = [
+    ("pilot letter mean .130",           mean([r["letter_accuracy"] for r in pil]), .130, .001),
+    ("pilot name mean .435",             mean([r["name_accuracy"] for r in pil]), .435, .001),
+    ("pilot min ratio 2.5",              min(float(r["ratio"]) for r in pil), 2.5, .05),
+    ("pilot max ratio 4.6",              max(float(r["ratio"]) for r in pil), 4.6, .05),
+    ("pilot items per corpus 100",       float(pil[0]["n"]), 100, 0),
+    ("chance rate .048",                 1 / 21, .048, .001),
+    ("supervised accuracy .612",         fam_acc["sup"], .612, .001),
+    ("llm accuracy .323",                fam_acc["llm"], .323, .002),
+    ("supervised 89% higher",            100 * (fam_acc["sup"] / fam_acc["llm"] - 1), 89, .5),
+    ("logreg .610",                      mean(by_mc[("tfidf-logreg", "sup")]), .610, .001),
+    ("svm .615",                         mean(by_mc[("tfidf-svm", "sup")]), .615, .001),
+    ("qwen3b zs .470",                   mean(by_mc[("qwen2.5-3b", "zs")]), .470, .002),
+    ("qwen3b cb .502",                   mean(by_mc[("qwen2.5-3b", "cb")]), .502, .002),
+    ("phi3.5 zs .474",                   mean(by_mc[("phi3.5-mini", "zs")]), .474, .002),
+    ("olmo zs .223 (five-shot baseline)", mean(by_mc[("olmo2-1b", "zs")]), .223, .002),
+    ("olmo fs .105",                     mean(by_mc[("olmo2-1b", "fs")]), .105, .002),
+    ("std diff country .017",            mean(std["country"]), .017, .002),
+    ("std diff era .013",                mean(std["era"]), .013, .002),
+    ("std diff length .021",             mean(std["length"]), .021, .002),
+    ("std diff venue .042",              mean(std["venue"]), .042, .001),
+    ("accuracy gap venue .142",          mean(gap["venue"]), .142, .001),
+    ("accuracy gap country .032",        mean(gap["country"]), .032, .001),
+    ("accuracy gap era .028",            mean(gap["era"]), .028, .002),
+    ("venue gap CI lo .112",             iv["accuracy_gap_by_grouping"]["venue"]["ci95"][0], .112, .001),
+    ("venue gap CI hi .187",             iv["accuracy_gap_by_grouping"]["venue"]["ci95"][1], .187, .001),
+    ("country gap CI lo .023",           iv["accuracy_gap_by_grouping"]["country"]["ci95"][0], .023, .001),
+    ("country gap CI hi .044",           iv["accuracy_gap_by_grouping"]["country"]["ci95"][1], .044, .001),
+    ("era gap CI lo .021",               iv["accuracy_gap_by_grouping"]["era"]["ci95"][0], .021, .002),
+    ("era gap CI hi .035",               iv["accuracy_gap_by_grouping"]["era"]["ci95"][1], .035, .002),
+    ("llm acc CI lo .206",               iv["accuracy_llm"]["ci95"][0], .206, .003),
+    ("llm acc CI hi .431",               iv["accuracy_llm"]["ci95"][1], .431, .003),
+    ("sup acc CI lo .610",               iv["accuracy_supervised"]["ci95"][0], .610, .001),
+    ("sup acc CI hi .615",               iv["accuracy_supervised"]["ci95"][1], .615, .001),
+    ("topic 20 venue gap .450",          mean(tg[20]), .450, .001),
+    ("topic 10 venue gap .444",          mean(tg[10]), .444, .001),
+    ("topic 12 venue gap .379",          mean(tg[12]), .379, .001),
+    ("topic 1 venue gap .349",           mean(tg[1]), .349, .002),
+    ("llm invariance tests 72",          len(ladf["llm"]), 72, 0),
+    ("sup invariance tests 8",           len(ladf["sup"]), 8, 0),
+    ("llm max p 1.1e-7",                 max(float(r["p"]) for r in ladf["llm"]) * 1e7, 1.1, .15),
+    ("sup max p 5.9e-13",                max(float(r["p"]) for r in ladf["sup"]) * 1e13, 5.9, .05),
+    ("llm nonuniform .90",               mean([1.0 * x for x in dsh["llm"]["n"]]), .90, .01),
+    ("sup nonuniform 1.00",              mean([1.0 * x for x in dsh["sup"]["n"]]), 1.00, .001),
+    ("llm uniform .61",                  mean([1.0 * x for x in dsh["llm"]["u"]]), .61, .01),
+    ("sup uniform .65",                  mean([1.0 * x for x in dsh["sup"]["u"]]), .65, .005),
+    ("llm median uniform OR 1.01",       float(np.median(dsh["llm"]["or"])), 1.01, .01),
+    ("llm chi2/df min 3.4",              min(mean(chi[("llm", g)]) for g in ("country", "venue", "length", "era")), 3.4, .05),
+    ("llm chi2/df max 5.6",              max(mean(chi[("llm", g)]) for g in ("country", "venue", "length", "era")), 5.6, .05),
+    ("sup chi2/df min 1.7",              min(mean(chi[("sup", g)]) for g in ("country", "venue", "length", "era")), 1.7, .05),
+    ("sup chi2/df max 2.4",              max(mean(chi[("sup", g)]) for g in ("country", "venue", "length", "era")), 2.4, .05),
+    ("phi3.5 level naive .297",          mean(lvl[("LEVEL", "phi3.5-mini")]["n"]), .297, .002),
+    ("phi3.5 level group .146",          mean(lvl[("LEVEL", "phi3.5-mini")]["g"]), .146, .002),
+    ("logreg level naive .066",          mean(lvl[("LEVEL", "tfidf-logreg")]["n"]), .066, .001),
+    ("svm level naive .101",             mean(lvl[("LEVEL", "tfidf-svm")]["n"]), .101, .001),
+    ("logreg level subgroup .126",       mean(lvl[("LEVEL", "tfidf-logreg")]["g"]), .126, .001),
+    ("svm level subgroup .116",          mean(lvl[("LEVEL", "tfidf-svm")]["g"]), .116, .001),
+    ("all LLMs: subgroup corr helps level", float(all(mean(lvl[("LEVEL", m)]["g"]) < mean(lvl[("LEVEL", m)]["n"]) for m in LLM)), 1.0, 0),
+    ("both SUP: subgroup corr hurts level", float(all(mean(lvl[("LEVEL", m)]["g"]) > mean(lvl[("LEVEL", m)]["n"]) for m in SUP)), 1.0, 0),
+    ("five venue levels",                 float(len({r["group"] for r in sg if r["grouping"] == "venue"})), 5.0, 0),
+    ("pooled excess llm .285",           iv["pooled_excess_error_llm"]["point"], .285, .002),
+    ("pooled excess llm CI lo .215",     iv["pooled_excess_error_llm"]["ci95"][0], .215, .004),
+    ("pooled excess llm CI hi .356",     iv["pooled_excess_error_llm"]["ci95"][1], .356, .004),
+    ("pooled excess sup .165",           iv["pooled_excess_error_supervised"]["point"], .165, .001),
+    ("pooled excess sup CI lo .159",     iv["pooled_excess_error_supervised"]["ci95"][0], .159, .001),
+    ("pooled excess sup CI hi .171",     iv["pooled_excess_error_supervised"]["ci95"][1], .171, .001),
+    ("pooled worse llm 97.9%",           iv["pooled_worse_share_llm"]["point"] * 100, 97.9, .1),
+    ("pooled worse llm CI lo 94.4",      iv["pooled_worse_share_llm"]["ci95"][0] * 100, 94.4, .6),
+    ("pooled worse sup 100%",            iv["pooled_worse_share_supervised"]["point"] * 100, 100, .01),
+    ("subgroup excess llm +.058",        iv["subgroup_excess_error_llm"]["point"], .058, .002),
+    ("subgroup excess llm CI lo -.035",  iv["subgroup_excess_error_llm"]["ci95"][0], -.035, .004),
+    ("subgroup excess llm CI hi .186",   iv["subgroup_excess_error_llm"]["ci95"][1], .186, .004),
+    ("subgroup excess sup +.114",        iv["subgroup_excess_error_supervised"]["point"], .114, .001),
+    ("subgroup excess sup CI lo .098",   iv["subgroup_excess_error_supervised"]["ci95"][0], .098, .001),
+    ("subgroup excess sup CI hi .129",   iv["subgroup_excess_error_supervised"]["ci95"][1], .129, .001),
+    ("mechanism cells 260",              mech["n_cells"], 260, 0),
+    ("mechanism singular cells 152",     mech["n_singular"], 152, 0),
+    ("mechanism well-conditioned 108",   mech["n_well_conditioned"], 108, 0),
+    ("pooled NNLS worse in all 260",     mech["share_observed_pooled_worse_nnls_all"] * 100, 100, .01),
+    ("naive pred-vs-obs rho .99",        mech["spearman_naive_pred_vs_obs"][0], .99, .005),
+    ("pooled pred-vs-obs rho .94",       mech["spearman_pooled_pred_vs_obs_exact"][0], .94, .005),
+    ("excess pred-vs-obs rho .94",       mech["spearman_excess_pred_vs_obs_exact"][0], .94, .005),
+    ("median relative error 11%",        mech["median_abs_rel_error_pooled"] * 100, 11, .5),
+    ("median amplification 60",          mech["median_amplification_well"], 60, .5),
+    ("log amplification-accuracy -.43",  mech["spearman_log_amplification_vs_accuracy"][0], -.43, .005),
+    ("well-conditioned: 4 LLMs",         float(len(set(mech["models_in_well"]) & LLM)), 4, 0),
+    ("well-conditioned: both sup",       float(len(set(mech["models_in_well"]) & SUP)), 2, 0),
+    ("pilot first-3 letter share nyt .76", float(pil[0].get("letter_share_first3", "nan") or "nan"), .76, .005),
+    ("llm subgroup beats pooled 86%",    100*np.mean([float(r["tv_group_correction"]) < float(r["tv_pooled_correction"]) for r in prev if r["group"].startswith("DIFF:") and r["model"] in LLM]), 86, .5),
+    ("sup subgroup beats pooled 81%",    100*np.mean([float(r["tv_group_correction"]) < float(r["tv_pooled_correction"]) for r in prev if r["group"].startswith("DIFF:") and r["model"] in SUP]), 81, .5),
+    ("pooled worse than none on DIFF for all 8 coders", float(all(mean(lvl2[m]["p"]) > mean(lvl2[m]["n"]) for m in LLM | SUP)), 1.0, 0),
+    ("Gov Ops venue gap ~.45",           mean(tg[20]), .45, .005),
+    ("country gap .032 x4 < venue .142", float(4 * mean(gap["country"]) < mean(gap["venue"])), 1.0, 0),
+    ("dif n min 1500",                   min(float(r["n"]) for r in dif), 1500, 0),
+    ("dif n max 5250",                   max(float(r["n"]) for r in dif), 5250, 0),
 ]
 
 bad = 0
-print(f"{'iddia':34s} {'hesap':>9s} {'metin':>9s}  durum")
-for name, computed, stated, tol in CLAIMS:
-    ok = abs(computed - stated) <= tol
+print(f"{'iddia':36s} {'hesap':>10s} {'metin':>10s}  durum")
+for name, got, said, tol in C:
+    ok = abs(float(got) - float(said)) <= tol
     bad += (not ok)
-    print(f"{name:34s} {computed:9.3f} {stated:9.3f}  {'OK' if ok else '<<< UYUSMUYOR'}")
-print(f"\ntoplam {len(CLAIMS)} iddia, {bad} uyusmazlik")
+    print(f"{name:36s} {float(got):10.3f} {float(said):10.3f}  {'OK' if ok else '<<< UYUSMUYOR'}")
+print(f"\ntoplam {len(C)} iddia, {bad} uyusmazlik")
 sys.exit(1 if bad else 0)
