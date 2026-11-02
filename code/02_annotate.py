@@ -39,12 +39,14 @@ DATA = os.path.join(ROOT, "data")
 OUTD = os.path.join(ROOT, "results", "annotations")
 os.makedirs(OUTD, exist_ok=True)
 
-# Six instruction-tuned models from five independent developers, 1B to 3.8B.
+# Six instruction-tuned models from five independent developers, 1B to 3.8B, plus the
+# 7-8B member of three of these families (run on an 8 GB card), so that model size can be
+# varied within a family with prompt, tokenizer and training recipe held fixed.
 # Llama and Gemma are gated behind an access request and were excluded so the whole
 # pipeline stays reproducible by any reader without credentials -- the same reason the
 # study uses local models at all. Every model is loaded in 4-bit NF4: forced by the
-# 4 GB card, but also the cleaner comparison, since a difference between models cannot
-# then be an artefact of one being quantised and another not.
+# 4 GB card for the small models and kept for the large ones, since a difference between
+# models cannot then be an artefact of one being quantised and another not.
 MODELS = {
     "olmo2-1b":      ("allenai/OLMo-2-0425-1B-Instruct",       "nf4"),
     "qwen2.5-1.5b":  ("Qwen/Qwen2.5-1.5B-Instruct",            "nf4"),
@@ -52,6 +54,9 @@ MODELS = {
     "granite3.1-2b": ("ibm-granite/granite-3.1-2b-instruct",   "nf4"),
     "qwen2.5-3b":    ("Qwen/Qwen2.5-3B-Instruct",              "nf4"),
     "phi3.5-mini":   ("microsoft/Phi-3.5-mini-instruct",       "nf4"),
+    "qwen2.5-7b":    ("Qwen/Qwen2.5-7B-Instruct",              "nf4"),
+    "olmo2-7b":      ("allenai/OLMo-2-1124-7B-Instruct",       "nf4"),
+    "granite3.1-8b": ("ibm-granite/granite-3.1-8b-instruct",   "nf4"),
 }
 CONDITIONS = ["zs", "cb", "fs"]          # zero-shot / codebook definitions / few-shot
 NAMES = [CAP_MAJOR_TOPICS[c] for c in VALID_CODES]
