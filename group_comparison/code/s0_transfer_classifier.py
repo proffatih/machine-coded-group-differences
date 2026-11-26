@@ -17,7 +17,10 @@ format of the annotation study.
 import csv, itertools, json, os, sys, time, warnings
 import numpy as np
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SSCR = os.path.dirname(ROOT)
+# the annotation study: a sibling folder in the working tree, the parent folder in the public repository
+SSCR = os.path.join(os.path.dirname(ROOT), "Social_Science_Computer_Review")
+if not os.path.isdir(SSCR):
+    SSCR = os.path.dirname(ROOT)
 sys.path.insert(0, os.path.join(SSCR, "code"))
 from cap_codebook import CORPORA, VALID_CODES, SEED
 from sklearn.feature_extraction.text import TfidfVectorizer

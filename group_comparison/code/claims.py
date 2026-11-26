@@ -238,6 +238,30 @@ C["ill_bias_se_mean"] = float(np.mean([num(r, "naive_bias_se") for r in ill]))
 C["ill_bias_mdb"] = 2.8 * C["ill_bias_se_mean"]      # 5% two-sided test, 80% power
 C["ill_n"] = len(ill)
 
+# ---------------- language models by size: 1-3.8B vs the 7-8B member of three families
+LARGE = ("olmo2-7b", "qwen2.5-7b", "granite3.1-8b")
+SIZE = lambda m: "large" if m in LARGE else "small"
+C["llm_large_n_models"] = len(LARGE)
+for sz in ("small", "large"):
+    o = [r for r in orc if r["fam"] == "llm" and SIZE(r["model"]) == sz]
+    C[f"orc_llm{sz}_n"] = len(o)
+    C[f"orc_llm{sz}_bc_group_tv"] = float(np.mean([num(r, "bc_oracle_group_tv") for r in o]))
+    C[f"orc_llm{sz}_bc_pooled_tv"] = float(np.mean([num(r, "bc_oracle_pooled_tv") for r in o]))
+    C[f"orc_llm{sz}_naive_tv"] = float(np.mean([num(r, "naive_tv_error") for r in o]))
+    C[f"orc_llm{sz}_singular_share"] = float(np.mean([num(r, "sigma_min_group") < 1e-4 for r in o]))
+    v = np.array([(u.sum(), cc.sum(1)[u].sum() / cc.sum())
+                  for (m, c, corp), d in _load().items() if FAM(m) == "llm" and SIZE(m) == sz
+                  for cc in [_counts(d["y"], d["pred"])] for u in [(cc.sum(0) == 0) & (cc.sum(1) > 0)]], dtype=float)
+    C[f"unassigned_llm{sz}_n"], C[f"unassigned_llm{sz}_mass"] = float(v[:, 0].mean()), float(v[:, 1].mean())
+    for d in ("within", "between"):
+        for nv in ("50", "200"):
+            k = collections.defaultdict(dict)
+            for r in RS:
+                if r["design"] == d and r["n_v"] == nv and r["fam"] == "llm" and SIZE(r["model"]) == sz:
+                    k[(r["model"], r["condition"], r["comparison"])][r["estimator"]] = num(r, "mean_tv_error")
+            C[f"real_{d}_{nv}_llm{sz}_bcpooled_worse_than_naive"] = float(np.mean([v["bc_pooled"] > v["naive"] for v in k.values()]))
+    C[f"acc_llm{sz}_mean"] = float(np.mean([num(r, "accuracy") for r in ca if r["model"] not in ("tfidf-logreg", "tfidf-svm", "tfidf-logreg-transfer") and SIZE(r["model"]) == sz]))
+
 json.dump(C, open(os.path.join(RES, "claims.json"), "w"), indent=1)
 if __name__ == "__main__":
     for k, v in C.items():

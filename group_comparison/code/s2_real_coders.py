@@ -2,7 +2,7 @@
 """Study 2: the estimators with real coders, where the truth is the human code.
 
 Every item of the seven CAP corpora (1,500 each) carries a human code and a code from
-each of 21 coder-condition combinations: six open-weight language models under three
+each of 30 coder-condition combinations: nine open-weight language models under three
 prompt conditions, two supervised classifiers cross-fitted within the corpus, and one
 classifier trained on the other six corpora. The five few-shot exemplars of each corpus
 are removed for every coder, so that no coder is evaluated on an item it was shown.
@@ -39,7 +39,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from estimators import ESTIMATORS, WITH_SE, estimate, tv, back_calc, decompose_naive, row_norm
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SSCR = os.path.dirname(ROOT)
+# the annotation study: a sibling folder in the working tree, the parent folder in the public repository
+SSCR = os.path.join(os.path.dirname(ROOT), "Social_Science_Computer_Review")
+if not os.path.isdir(SSCR):
+    SSCR = os.path.dirname(ROOT)
 ANN = [os.path.join(SSCR, "results", "annotations"),
        os.path.join(ROOT, "results", "annotations_transfer")]
 PAIRS = os.path.join(ROOT, "results", "annotations_transfer_pairs")

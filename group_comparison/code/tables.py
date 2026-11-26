@@ -12,7 +12,7 @@ T1 = r"""\begin{table}[htbp]
 share of machine codes for each topic in group $g$; the validation items are a random
 sample of the coded items whose human code is known. ``Valid'' means consistent for every
 pair of confusion matrices, including when the coder errs differently in the two groups,
-given validation items from each group. Formulas and standard errors are in the Appendix.}
+given validation items from each group. Formulas and standard errors are in Online Appendix A.}
 \label{tab:estimators}
 \footnotesize
 \setlength{\tabcolsep}{4pt}
@@ -63,14 +63,16 @@ Newspaper front page & Media & UK & 1,500 & 6.5 & 21 & 20.1 \\
 
 ROWS = [("OLMo-2 1B", "olmo2-1b", "allenai"), ("Qwen2.5 1.5B", "qwen2.5-1.5b", "Qwen"),
         ("SmolLM2 1.7B", "smollm2-1.7b", "HuggingFaceTB"), ("Granite 3.1 2B", "granite3.1-2b", "ibm-granite"),
-        ("Qwen2.5 3B", "qwen2.5-3b", "Qwen"), ("Phi-3.5-mini 3.8B", "phi3.5-mini", "microsoft")]
+        ("Qwen2.5 3B", "qwen2.5-3b", "Qwen"), ("Phi-3.5-mini 3.8B", "phi3.5-mini", "microsoft"),
+        ("OLMo-2 7B", "olmo2-7b", "allenai"), ("Qwen2.5 7B", "qwen2.5-7b", "Qwen"),
+        ("Granite 3.1 8B", "granite3.1-8b", "ibm-granite")]
 body = "\n".join(f"{n} & {d} & {f3(C['acc_'+k+'_zs'])} & {f3(C['acc_'+k+'_cb'])} & {f3(C['acc_'+k+'_fs'])} \\\\"
                  for n, k, d in ROWS)
 T3 = r"""\begin{table}[htbp]
 \centering
 \caption{The coders and their agreement with the human code, averaged over the seven
 corpora. Chance is .048; always predicting a corpus's most frequent topic would score
-""" + f3(C["majority_baseline_mean"]) + r""" on average. The six language models are open-weight instruction-tuned models
+""" + f3(C["majority_baseline_mean"]) + r""" on average. The nine language models are open-weight instruction-tuned models
 loaded in 4-bit NF4 quantisation and prompted zero-shot, zero-shot with codebook
 definitions, or with five examples from the same corpus; each topic's score is read from
 the logits of its name. The two supervised classifiers use TF-IDF word and character
@@ -112,8 +114,7 @@ variation distance from the human-coded difference, averaged over comparisons an
 (within a corpus) or 100 (between corpora) validation draws), and coverage of nominal 95\%
 intervals for the most prevalent topic. For the uncorrected difference the interval is the
 binomial one a researcher would report, and does not depend on $n_v$. Within-corpus
-comparisons: 21 coder--condition combinations $\times$ seven corpora for each split;
-between-corpus comparisons: 21 $\times$ 21 pairs. BC = back-calculation; RG = per-category
+comparisons: 30 coder--condition combinations $\times$ seven corpora for each split (420); between-corpus comparisons: 30 combinations $\times$ 21 pairs of corpora (630). Coverage of the calibration and per-category estimators and of hand coding is reported in the text and in Online Appendix C. BC = back-calculation; RG = per-category
 (Rogan--Gladen) correction. The transfer classifier codes each pair of corpora with a model
 trained on the five corpora outside the pair.}
 \label{tab:real}

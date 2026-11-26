@@ -1,0 +1,1014 @@
+{
+ "between": {
+  "confusable0.05": {
+   "bc_group": {
+    "tv_latent": 0.641,
+    "tv_human": 0.641,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.053
+   },
+   "bc_pooled": {
+    "tv_latent": 0.633,
+    "tv_human": 0.632,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.022
+   },
+   "cal_group": {
+    "tv_latent": 0.205,
+    "tv_human": 0.205,
+    "cov_latent": 0.969,
+    "cov_human": 0.97,
+    "focal_bias_latent": 0.002
+   },
+   "dd_group": {
+    "tv_latent": 0.238,
+    "tv_human": 0.238,
+    "cov_latent": 0.952,
+    "cov_human": 0.953,
+    "focal_bias_latent": 0.002
+   },
+   "dd_tuned": {
+    "tv_latent": 0.2,
+    "tv_human": 0.2,
+    "cov_latent": 0.948,
+    "cov_human": 0.949,
+    "focal_bias_latent": 0.002
+   },
+   "hand": {
+    "tv_latent": 0.218,
+    "tv_human": 0.218,
+    "cov_latent": 0.95,
+    "cov_human": 0.951,
+    "focal_bias_latent": 0.002
+   },
+   "naive": {
+    "tv_latent": 0.435,
+    "tv_human": 0.435,
+    "cov_latent": 0.163,
+    "cov_human": 0.164,
+    "focal_bias_latent": -0.009
+   },
+   "rg_group": {
+    "tv_latent": 0.482,
+    "tv_human": 0.481,
+    "cov_latent": 0.805,
+    "cov_human": 0.805,
+    "focal_bias_latent": 0.029
+   },
+   "_target": {
+    "human_target_tv_gap": 0.009,
+    "true_tv_difference": 0.365,
+    "focal_attenuation_median": 0.984
+   }
+  },
+  "confusable0.1": {
+   "bc_group": {
+    "tv_latent": 0.648,
+    "tv_human": 0.648,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.053
+   },
+   "bc_pooled": {
+    "tv_latent": 0.645,
+    "tv_human": 0.644,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.02
+   },
+   "cal_group": {
+    "tv_latent": 0.208,
+    "tv_human": 0.207,
+    "cov_latent": 0.967,
+    "cov_human": 0.968,
+    "focal_bias_latent": 0.004
+   },
+   "dd_group": {
+    "tv_latent": 0.243,
+    "tv_human": 0.242,
+    "cov_latent": 0.952,
+    "cov_human": 0.953,
+    "focal_bias_latent": 0.003
+   },
+   "dd_tuned": {
+    "tv_latent": 0.203,
+    "tv_human": 0.202,
+    "cov_latent": 0.948,
+    "cov_human": 0.949,
+    "focal_bias_latent": 0.003
+   },
+   "hand": {
+    "tv_latent": 0.219,
+    "tv_human": 0.218,
+    "cov_latent": 0.949,
+    "cov_human": 0.95,
+    "focal_bias_latent": 0.003
+   },
+   "naive": {
+    "tv_latent": 0.435,
+    "tv_human": 0.435,
+    "cov_latent": 0.163,
+    "cov_human": 0.156,
+    "focal_bias_latent": -0.009
+   },
+   "rg_group": {
+    "tv_latent": 0.499,
+    "tv_human": 0.499,
+    "cov_latent": 0.804,
+    "cov_human": 0.805,
+    "focal_bias_latent": 0.03
+   },
+   "_target": {
+    "human_target_tv_gap": 0.018,
+    "true_tv_difference": 0.365,
+    "focal_attenuation_median": 0.968
+   }
+  },
+  "confusable0.2": {
+   "bc_group": {
+    "tv_latent": 0.663,
+    "tv_human": 0.663,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.054
+   },
+   "bc_pooled": {
+    "tv_latent": 0.668,
+    "tv_human": 0.667,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.017
+   },
+   "cal_group": {
+    "tv_latent": 0.216,
+    "tv_human": 0.212,
+    "cov_latent": 0.961,
+    "cov_human": 0.966,
+    "focal_bias_latent": 0.008
+   },
+   "dd_group": {
+    "tv_latent": 0.252,
+    "tv_human": 0.249,
+    "cov_latent": 0.946,
+    "cov_human": 0.95,
+    "focal_bias_latent": 0.007
+   },
+   "dd_tuned": {
+    "tv_latent": 0.21,
+    "tv_human": 0.206,
+    "cov_latent": 0.941,
+    "cov_human": 0.946,
+    "focal_bias_latent": 0.007
+   },
+   "hand": {
+    "tv_latent": 0.222,
+    "tv_human": 0.219,
+    "cov_latent": 0.943,
+    "cov_human": 0.949,
+    "focal_bias_latent": 0.007
+   },
+   "naive": {
+    "tv_latent": 0.435,
+    "tv_human": 0.436,
+    "cov_latent": 0.163,
+    "cov_human": 0.156,
+    "focal_bias_latent": -0.009
+   },
+   "rg_group": {
+    "tv_latent": 0.533,
+    "tv_human": 0.532,
+    "cov_latent": 0.801,
+    "cov_human": 0.805,
+    "focal_bias_latent": 0.031
+   },
+   "_target": {
+    "human_target_tv_gap": 0.035,
+    "true_tv_difference": 0.365,
+    "focal_attenuation_median": 0.936
+   }
+  },
+  "differential": {
+   "bc_group": {
+    "tv_latent": 0.678,
+    "tv_human": 0.664,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.074
+   },
+   "bc_pooled": {
+    "tv_latent": 0.666,
+    "tv_human": 0.665,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.003
+   },
+   "cal_group": {
+    "tv_latent": 0.224,
+    "tv_human": 0.215,
+    "cov_latent": 0.944,
+    "cov_human": 0.972,
+    "focal_bias_latent": 0.023
+   },
+   "dd_group": {
+    "tv_latent": 0.255,
+    "tv_human": 0.248,
+    "cov_latent": 0.925,
+    "cov_human": 0.954,
+    "focal_bias_latent": 0.023
+   },
+   "dd_tuned": {
+    "tv_latent": 0.218,
+    "tv_human": 0.21,
+    "cov_latent": 0.911,
+    "cov_human": 0.95,
+    "focal_bias_latent": 0.023
+   },
+   "hand": {
+    "tv_latent": 0.233,
+    "tv_human": 0.226,
+    "cov_latent": 0.917,
+    "cov_human": 0.952,
+    "focal_bias_latent": 0.023
+   },
+   "naive": {
+    "tv_latent": 0.435,
+    "tv_human": 0.424,
+    "cov_latent": 0.163,
+    "cov_human": 0.143,
+    "focal_bias_latent": -0.009
+   },
+   "rg_group": {
+    "tv_latent": 0.492,
+    "tv_human": 0.48,
+    "cov_latent": 0.806,
+    "cov_human": 0.818,
+    "focal_bias_latent": 0.043
+   },
+   "_target": {
+    "human_target_tv_gap": 0.058,
+    "true_tv_difference": 0.365,
+    "focal_attenuation_median": 0.793
+   }
+  },
+  "symmetric0.0": {
+   "bc_group": {
+    "tv_latent": 0.633,
+    "tv_human": 0.633,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.054
+   },
+   "bc_pooled": {
+    "tv_latent": 0.621,
+    "tv_human": 0.621,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.02
+   },
+   "cal_group": {
+    "tv_latent": 0.201,
+    "tv_human": 0.201,
+    "cov_latent": 0.971,
+    "cov_human": 0.971,
+    "focal_bias_latent": 0.001
+   },
+   "dd_group": {
+    "tv_latent": 0.234,
+    "tv_human": 0.234,
+    "cov_latent": 0.954,
+    "cov_human": 0.954,
+    "focal_bias_latent": 0.0
+   },
+   "dd_tuned": {
+    "tv_latent": 0.197,
+    "tv_human": 0.197,
+    "cov_latent": 0.951,
+    "cov_human": 0.951,
+    "focal_bias_latent": 0.0
+   },
+   "hand": {
+    "tv_latent": 0.217,
+    "tv_human": 0.217,
+    "cov_latent": 0.953,
+    "cov_human": 0.953,
+    "focal_bias_latent": -0.0
+   },
+   "naive": {
+    "tv_latent": 0.435,
+    "tv_human": 0.435,
+    "cov_latent": 0.163,
+    "cov_human": 0.163,
+    "focal_bias_latent": -0.009
+   },
+   "rg_group": {
+    "tv_latent": 0.466,
+    "tv_human": 0.466,
+    "cov_latent": 0.805,
+    "cov_human": 0.805,
+    "focal_bias_latent": 0.027
+   },
+   "_target": {
+    "human_target_tv_gap": 0.0,
+    "true_tv_difference": 0.365,
+    "focal_attenuation_median": 1.0
+   }
+  },
+  "symmetric0.05": {
+   "bc_group": {
+    "tv_latent": 0.657,
+    "tv_human": 0.651,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.059
+   },
+   "bc_pooled": {
+    "tv_latent": 0.643,
+    "tv_human": 0.642,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.016
+   },
+   "cal_group": {
+    "tv_latent": 0.21,
+    "tv_human": 0.208,
+    "cov_latent": 0.969,
+    "cov_human": 0.972,
+    "focal_bias_latent": 0.006
+   },
+   "dd_group": {
+    "tv_latent": 0.242,
+    "tv_human": 0.241,
+    "cov_latent": 0.952,
+    "cov_human": 0.954,
+    "focal_bias_latent": 0.005
+   },
+   "dd_tuned": {
+    "tv_latent": 0.205,
+    "tv_human": 0.204,
+    "cov_latent": 0.947,
+    "cov_human": 0.951,
+    "focal_bias_latent": 0.005
+   },
+   "hand": {
+    "tv_latent": 0.223,
+    "tv_human": 0.222,
+    "cov_latent": 0.949,
+    "cov_human": 0.952,
+    "focal_bias_latent": 0.005
+   },
+   "naive": {
+    "tv_latent": 0.435,
+    "tv_human": 0.428,
+    "cov_latent": 0.163,
+    "cov_human": 0.163,
+    "focal_bias_latent": -0.009
+   },
+   "rg_group": {
+    "tv_latent": 0.478,
+    "tv_human": 0.473,
+    "cov_latent": 0.808,
+    "cov_human": 0.808,
+    "focal_bias_latent": 0.031
+   },
+   "_target": {
+    "human_target_tv_gap": 0.019,
+    "true_tv_difference": 0.365,
+    "focal_attenuation_median": 0.948
+   }
+  },
+  "symmetric0.1": {
+   "bc_group": {
+    "tv_latent": 0.676,
+    "tv_human": 0.665,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.063
+   },
+   "bc_pooled": {
+    "tv_latent": 0.664,
+    "tv_human": 0.663,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.013
+   },
+   "cal_group": {
+    "tv_latent": 0.22,
+    "tv_human": 0.215,
+    "cov_latent": 0.962,
+    "cov_human": 0.972,
+    "focal_bias_latent": 0.011
+   },
+   "dd_group": {
+    "tv_latent": 0.251,
+    "tv_human": 0.247,
+    "cov_latent": 0.944,
+    "cov_human": 0.953,
+    "focal_bias_latent": 0.01
+   },
+   "dd_tuned": {
+    "tv_latent": 0.213,
+    "tv_human": 0.209,
+    "cov_latent": 0.936,
+    "cov_human": 0.95,
+    "focal_bias_latent": 0.01
+   },
+   "hand": {
+    "tv_latent": 0.229,
+    "tv_human": 0.225,
+    "cov_latent": 0.94,
+    "cov_human": 0.952,
+    "focal_bias_latent": 0.01
+   },
+   "naive": {
+    "tv_latent": 0.435,
+    "tv_human": 0.422,
+    "cov_latent": 0.163,
+    "cov_human": 0.161,
+    "focal_bias_latent": -0.009
+   },
+   "rg_group": {
+    "tv_latent": 0.49,
+    "tv_human": 0.479,
+    "cov_latent": 0.807,
+    "cov_human": 0.808,
+    "focal_bias_latent": 0.034
+   },
+   "_target": {
+    "human_target_tv_gap": 0.038,
+    "true_tv_difference": 0.365,
+    "focal_attenuation_median": 0.895
+   }
+  },
+  "symmetric0.2": {
+   "bc_group": {
+    "tv_latent": 0.708,
+    "tv_human": 0.683,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.07
+   },
+   "bc_pooled": {
+    "tv_latent": 0.701,
+    "tv_human": 0.699,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.014
+   },
+   "cal_group": {
+    "tv_latent": 0.243,
+    "tv_human": 0.226,
+    "cov_latent": 0.934,
+    "cov_human": 0.972,
+    "focal_bias_latent": 0.021
+   },
+   "dd_group": {
+    "tv_latent": 0.273,
+    "tv_human": 0.26,
+    "cov_latent": 0.916,
+    "cov_human": 0.953,
+    "focal_bias_latent": 0.021
+   },
+   "dd_tuned": {
+    "tv_latent": 0.235,
+    "tv_human": 0.22,
+    "cov_latent": 0.896,
+    "cov_human": 0.949,
+    "focal_bias_latent": 0.021
+   },
+   "hand": {
+    "tv_latent": 0.246,
+    "tv_human": 0.232,
+    "cov_latent": 0.903,
+    "cov_human": 0.951,
+    "focal_bias_latent": 0.021
+   },
+   "naive": {
+    "tv_latent": 0.435,
+    "tv_human": 0.412,
+    "cov_latent": 0.163,
+    "cov_human": 0.148,
+    "focal_bias_latent": -0.009
+   },
+   "rg_group": {
+    "tv_latent": 0.515,
+    "tv_human": 0.49,
+    "cov_latent": 0.802,
+    "cov_human": 0.808,
+    "focal_bias_latent": 0.042
+   },
+   "_target": {
+    "human_target_tv_gap": 0.077,
+    "true_tv_difference": 0.365,
+    "focal_attenuation_median": 0.79
+   }
+  }
+ },
+ "within": {
+  "confusable0.05": {
+   "bc_group": {
+    "tv_latent": 0.549,
+    "tv_human": 0.546,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.005
+   },
+   "bc_pooled": {
+    "tv_latent": 0.339,
+    "tv_human": 0.338,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.004
+   },
+   "cal_group": {
+    "tv_latent": 0.193,
+    "tv_human": 0.193,
+    "cov_latent": 0.965,
+    "cov_human": 0.965,
+    "focal_bias_latent": -0.0
+   },
+   "dd_group": {
+    "tv_latent": 0.224,
+    "tv_human": 0.224,
+    "cov_latent": 0.951,
+    "cov_human": 0.952,
+    "focal_bias_latent": -0.0
+   },
+   "dd_tuned": {
+    "tv_latent": 0.189,
+    "tv_human": 0.188,
+    "cov_latent": 0.947,
+    "cov_human": 0.948,
+    "focal_bias_latent": -0.0
+   },
+   "hand": {
+    "tv_latent": 0.206,
+    "tv_human": 0.205,
+    "cov_latent": 0.95,
+    "cov_human": 0.95,
+    "focal_bias_latent": 0.0
+   },
+   "naive": {
+    "tv_latent": 0.168,
+    "tv_human": 0.162,
+    "cov_latent": 0.51,
+    "cov_human": 0.543,
+    "focal_bias_latent": -0.0
+   },
+   "rg_group": {
+    "tv_latent": 0.376,
+    "tv_human": 0.373,
+    "cov_latent": 0.866,
+    "cov_human": 0.872,
+    "focal_bias_latent": 0.005
+   },
+   "_target": {
+    "human_target_tv_gap": 0.011,
+    "true_tv_difference": 0.199,
+    "focal_attenuation_median": 0.944
+   }
+  },
+  "confusable0.1": {
+   "bc_group": {
+    "tv_latent": 0.56,
+    "tv_human": 0.555,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.002
+   },
+   "bc_pooled": {
+    "tv_latent": 0.352,
+    "tv_human": 0.35,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.004
+   },
+   "cal_group": {
+    "tv_latent": 0.198,
+    "tv_human": 0.196,
+    "cov_latent": 0.961,
+    "cov_human": 0.962,
+    "focal_bias_latent": -0.0
+   },
+   "dd_group": {
+    "tv_latent": 0.23,
+    "tv_human": 0.229,
+    "cov_latent": 0.949,
+    "cov_human": 0.95,
+    "focal_bias_latent": 0.0
+   },
+   "dd_tuned": {
+    "tv_latent": 0.193,
+    "tv_human": 0.191,
+    "cov_latent": 0.943,
+    "cov_human": 0.945,
+    "focal_bias_latent": -0.0
+   },
+   "hand": {
+    "tv_latent": 0.208,
+    "tv_human": 0.206,
+    "cov_latent": 0.945,
+    "cov_human": 0.946,
+    "focal_bias_latent": -0.0
+   },
+   "naive": {
+    "tv_latent": 0.168,
+    "tv_human": 0.156,
+    "cov_latent": 0.51,
+    "cov_human": 0.562,
+    "focal_bias_latent": -0.0
+   },
+   "rg_group": {
+    "tv_latent": 0.391,
+    "tv_human": 0.385,
+    "cov_latent": 0.866,
+    "cov_human": 0.872,
+    "focal_bias_latent": 0.009
+   },
+   "_target": {
+    "human_target_tv_gap": 0.021,
+    "true_tv_difference": 0.199,
+    "focal_attenuation_median": 0.889
+   }
+  },
+  "confusable0.2": {
+   "bc_group": {
+    "tv_latent": 0.577,
+    "tv_human": 0.567,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.007
+   },
+   "bc_pooled": {
+    "tv_latent": 0.376,
+    "tv_human": 0.374,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.0
+   },
+   "cal_group": {
+    "tv_latent": 0.207,
+    "tv_human": 0.202,
+    "cov_latent": 0.954,
+    "cov_human": 0.96,
+    "focal_bias_latent": -0.002
+   },
+   "dd_group": {
+    "tv_latent": 0.241,
+    "tv_human": 0.237,
+    "cov_latent": 0.943,
+    "cov_human": 0.948,
+    "focal_bias_latent": -0.002
+   },
+   "dd_tuned": {
+    "tv_latent": 0.201,
+    "tv_human": 0.196,
+    "cov_latent": 0.933,
+    "cov_human": 0.94,
+    "focal_bias_latent": -0.002
+   },
+   "hand": {
+    "tv_latent": 0.212,
+    "tv_human": 0.207,
+    "cov_latent": 0.935,
+    "cov_human": 0.943,
+    "focal_bias_latent": -0.002
+   },
+   "naive": {
+    "tv_latent": 0.168,
+    "tv_human": 0.146,
+    "cov_latent": 0.51,
+    "cov_human": 0.586,
+    "focal_bias_latent": -0.0
+   },
+   "rg_group": {
+    "tv_latent": 0.419,
+    "tv_human": 0.406,
+    "cov_latent": 0.863,
+    "cov_human": 0.871,
+    "focal_bias_latent": 0.002
+   },
+   "_target": {
+    "human_target_tv_gap": 0.043,
+    "true_tv_difference": 0.199,
+    "focal_attenuation_median": 0.777
+   }
+  },
+  "differential": {
+   "bc_group": {
+    "tv_latent": 0.587,
+    "tv_human": 0.583,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.009
+   },
+   "bc_pooled": {
+    "tv_latent": 0.365,
+    "tv_human": 0.366,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.007
+   },
+   "cal_group": {
+    "tv_latent": 0.21,
+    "tv_human": 0.206,
+    "cov_latent": 0.959,
+    "cov_human": 0.968,
+    "focal_bias_latent": 0.015
+   },
+   "dd_group": {
+    "tv_latent": 0.24,
+    "tv_human": 0.236,
+    "cov_latent": 0.94,
+    "cov_human": 0.952,
+    "focal_bias_latent": 0.016
+   },
+   "dd_tuned": {
+    "tv_latent": 0.205,
+    "tv_human": 0.201,
+    "cov_latent": 0.934,
+    "cov_human": 0.946,
+    "focal_bias_latent": 0.015
+   },
+   "hand": {
+    "tv_latent": 0.219,
+    "tv_human": 0.216,
+    "cov_latent": 0.939,
+    "cov_human": 0.949,
+    "focal_bias_latent": 0.015
+   },
+   "naive": {
+    "tv_latent": 0.168,
+    "tv_human": 0.164,
+    "cov_latent": 0.51,
+    "cov_human": 0.467,
+    "focal_bias_latent": -0.0
+   },
+   "rg_group": {
+    "tv_latent": 0.385,
+    "tv_human": 0.381,
+    "cov_latent": 0.864,
+    "cov_human": 0.833,
+    "focal_bias_latent": 0.018
+   },
+   "_target": {
+    "human_target_tv_gap": 0.042,
+    "true_tv_difference": 0.199,
+    "focal_attenuation_median": 1.084
+   }
+  },
+  "symmetric0.0": {
+   "bc_group": {
+    "tv_latent": 0.536,
+    "tv_human": 0.536,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.002
+   },
+   "bc_pooled": {
+    "tv_latent": 0.326,
+    "tv_human": 0.326,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.006
+   },
+   "cal_group": {
+    "tv_latent": 0.189,
+    "tv_human": 0.189,
+    "cov_latent": 0.969,
+    "cov_human": 0.969,
+    "focal_bias_latent": -0.001
+   },
+   "dd_group": {
+    "tv_latent": 0.219,
+    "tv_human": 0.219,
+    "cov_latent": 0.955,
+    "cov_human": 0.955,
+    "focal_bias_latent": -0.001
+   },
+   "dd_tuned": {
+    "tv_latent": 0.185,
+    "tv_human": 0.185,
+    "cov_latent": 0.952,
+    "cov_human": 0.952,
+    "focal_bias_latent": -0.001
+   },
+   "hand": {
+    "tv_latent": 0.204,
+    "tv_human": 0.204,
+    "cov_latent": 0.953,
+    "cov_human": 0.953,
+    "focal_bias_latent": -0.001
+   },
+   "naive": {
+    "tv_latent": 0.168,
+    "tv_human": 0.168,
+    "cov_latent": 0.51,
+    "cov_human": 0.51,
+    "focal_bias_latent": -0.0
+   },
+   "rg_group": {
+    "tv_latent": 0.363,
+    "tv_human": 0.363,
+    "cov_latent": 0.868,
+    "cov_human": 0.868,
+    "focal_bias_latent": 0.007
+   },
+   "_target": {
+    "human_target_tv_gap": 0.0,
+    "true_tv_difference": 0.199,
+    "focal_attenuation_median": 1.0
+   }
+  },
+  "symmetric0.05": {
+   "bc_group": {
+    "tv_latent": 0.566,
+    "tv_human": 0.563,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.002
+   },
+   "bc_pooled": {
+    "tv_latent": 0.347,
+    "tv_human": 0.346,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.005
+   },
+   "cal_group": {
+    "tv_latent": 0.199,
+    "tv_human": 0.198,
+    "cov_latent": 0.968,
+    "cov_human": 0.968,
+    "focal_bias_latent": -0.0
+   },
+   "dd_group": {
+    "tv_latent": 0.228,
+    "tv_human": 0.228,
+    "cov_latent": 0.954,
+    "cov_human": 0.954,
+    "focal_bias_latent": -0.0
+   },
+   "dd_tuned": {
+    "tv_latent": 0.194,
+    "tv_human": 0.193,
+    "cov_latent": 0.949,
+    "cov_human": 0.949,
+    "focal_bias_latent": -0.0
+   },
+   "hand": {
+    "tv_latent": 0.21,
+    "tv_human": 0.21,
+    "cov_latent": 0.951,
+    "cov_human": 0.951,
+    "focal_bias_latent": -0.0
+   },
+   "naive": {
+    "tv_latent": 0.168,
+    "tv_human": 0.162,
+    "cov_latent": 0.51,
+    "cov_human": 0.533,
+    "focal_bias_latent": -0.0
+   },
+   "rg_group": {
+    "tv_latent": 0.373,
+    "tv_human": 0.37,
+    "cov_latent": 0.866,
+    "cov_human": 0.872,
+    "focal_bias_latent": 0.008
+   },
+   "_target": {
+    "human_target_tv_gap": 0.01,
+    "true_tv_difference": 0.199,
+    "focal_attenuation_median": 0.947
+   }
+  },
+  "symmetric0.1": {
+   "bc_group": {
+    "tv_latent": 0.587,
+    "tv_human": 0.582,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.001
+   },
+   "bc_pooled": {
+    "tv_latent": 0.365,
+    "tv_human": 0.362,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.005
+   },
+   "cal_group": {
+    "tv_latent": 0.207,
+    "tv_human": 0.206,
+    "cov_latent": 0.967,
+    "cov_human": 0.966,
+    "focal_bias_latent": -0.001
+   },
+   "dd_group": {
+    "tv_latent": 0.237,
+    "tv_human": 0.236,
+    "cov_latent": 0.951,
+    "cov_human": 0.952,
+    "focal_bias_latent": -0.001
+   },
+   "dd_tuned": {
+    "tv_latent": 0.202,
+    "tv_human": 0.201,
+    "cov_latent": 0.946,
+    "cov_human": 0.947,
+    "focal_bias_latent": -0.0
+   },
+   "hand": {
+    "tv_latent": 0.217,
+    "tv_human": 0.215,
+    "cov_latent": 0.95,
+    "cov_human": 0.949,
+    "focal_bias_latent": -0.0
+   },
+   "naive": {
+    "tv_latent": 0.168,
+    "tv_human": 0.156,
+    "cov_latent": 0.51,
+    "cov_human": 0.548,
+    "focal_bias_latent": -0.0
+   },
+   "rg_group": {
+    "tv_latent": 0.383,
+    "tv_human": 0.377,
+    "cov_latent": 0.865,
+    "cov_human": 0.872,
+    "focal_bias_latent": 0.008
+   },
+   "_target": {
+    "human_target_tv_gap": 0.021,
+    "true_tv_difference": 0.199,
+    "focal_attenuation_median": 0.895
+   }
+  },
+  "symmetric0.2": {
+   "bc_group": {
+    "tv_latent": 0.618,
+    "tv_human": 0.607,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": -0.001
+   },
+   "bc_pooled": {
+    "tv_latent": 0.399,
+    "tv_human": 0.394,
+    "cov_latent": null,
+    "cov_human": null,
+    "focal_bias_latent": 0.004
+   },
+   "cal_group": {
+    "tv_latent": 0.223,
+    "tv_human": 0.218,
+    "cov_latent": 0.964,
+    "cov_human": 0.967,
+    "focal_bias_latent": 0.0
+   },
+   "dd_group": {
+    "tv_latent": 0.253,
+    "tv_human": 0.249,
+    "cov_latent": 0.947,
+    "cov_human": 0.948,
+    "focal_bias_latent": 0.0
+   },
+   "dd_tuned": {
+    "tv_latent": 0.217,
+    "tv_human": 0.212,
+    "cov_latent": 0.942,
+    "cov_human": 0.946,
+    "focal_bias_latent": 0.0
+   },
+   "hand": {
+    "tv_latent": 0.227,
+    "tv_human": 0.223,
+    "cov_latent": 0.943,
+    "cov_human": 0.947,
+    "focal_bias_latent": 0.0
+   },
+   "naive": {
+    "tv_latent": 0.168,
+    "tv_human": 0.146,
+    "cov_latent": 0.51,
+    "cov_human": 0.557,
+    "focal_bias_latent": -0.0
+   },
+   "rg_group": {
+    "tv_latent": 0.406,
+    "tv_human": 0.393,
+    "cov_latent": 0.862,
+    "cov_human": 0.875,
+    "focal_bias_latent": 0.007
+   },
+   "_target": {
+    "human_target_tv_gap": 0.042,
+    "true_tv_difference": 0.199,
+    "focal_attenuation_median": 0.79
+   }
+  }
+ }
+}

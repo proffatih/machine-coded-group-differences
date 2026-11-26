@@ -5,7 +5,7 @@ The model never generates free text. The 21 CAP topics are listed by name, and t
 score for each topic is read from the logits at the answer position. One forward pass
 therefore yields a well-defined 21-way response distribution, and every item receives a
 response -- no refusals, no unparsable output, no silent attrition that would itself
-differ by subgroup and contaminate the invariance tests downstream.
+differ by group and bias the comparisons downstream.
 
 Why by name rather than by letter. An earlier version presented the topics as lettered
 options and read the logits over "A".."U". Small models handled that badly: they

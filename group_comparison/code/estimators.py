@@ -55,8 +55,14 @@ def row_norm(n):
 
 
 def back_calc(q, conf_counts):
-    """Solve C^T x = q on the simplex by NNLS; C estimated from counts."""
-    x, _ = nnls(row_norm(conf_counts).T, q)
+    """Solve C^T x = q on the simplex by NNLS; C estimated from counts. If NNLS does not
+    converge (a degenerate matrix, seen only with two-category schemes), the least-squares
+    solution is clipped at zero instead."""
+    A = row_norm(conf_counts).T
+    try:
+        x, _ = nnls(A, q)
+    except RuntimeError:
+        x = np.clip(np.linalg.lstsq(A, q, rcond=None)[0], 0, None)
     s = x.sum()
     return x / s if s > 0 else q
 

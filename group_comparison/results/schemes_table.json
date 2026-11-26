@@ -1,0 +1,112 @@
+{
+ "cap21": {
+  "within": {
+   "worse": 0.9952,
+   "naive": 0.5095,
+   "rg_group": 0.8664,
+   "cal_group": 0.9695,
+   "dd_tuned": 0.9512,
+   "gain": 0.9488
+  },
+  "between": {
+   "worse": 0.981,
+   "naive": 0.1635,
+   "rg_group": 0.8134,
+   "cal_group": 0.9719,
+   "dd_tuned": 0.952,
+   "gain": 0.9379
+  },
+  "n": [
+   210,
+   630
+  ]
+ },
+ "random10": {
+  "within": {
+   "worse": 0.9833,
+   "naive": 0.5043,
+   "rg_group": 0.8922,
+   "cal_group": 0.9508,
+   "dd_tuned": 0.9503,
+   "gain": 0.9366
+  },
+  "between": {
+   "worse": 0.9878,
+   "naive": 0.1859,
+   "rg_group": 0.8516,
+   "cal_group": 0.9515,
+   "dd_tuned": 0.9501,
+   "gain": 0.9354
+  },
+  "n": [
+   2100,
+   6090
+  ]
+ },
+ "random5": {
+  "within": {
+   "worse": 0.961,
+   "naive": 0.5624,
+   "rg_group": 0.9155,
+   "cal_group": 0.9448,
+   "dd_tuned": 0.95,
+   "gain": 0.9409
+  },
+  "between": {
+   "worse": 0.9709,
+   "naive": 0.2028,
+   "rg_group": 0.88,
+   "cal_group": 0.9448,
+   "dd_tuned": 0.9495,
+   "gain": 0.9367
+  },
+  "n": [
+   2100,
+   6090
+  ]
+ },
+ "random2": {
+  "within": {
+   "worse": 0.7967,
+   "naive": 0.5695,
+   "rg_group": 0.9656,
+   "cal_group": 0.9455,
+   "dd_tuned": 0.9489,
+   "gain": 0.936
+  },
+  "between": {
+   "worse": 0.9011,
+   "naive": 0.2138,
+   "rg_group": 0.9332,
+   "cal_group": 0.9463,
+   "dd_tuned": 0.9493,
+   "gain": 0.9339
+  },
+  "n": [
+   2100,
+   6090
+  ]
+ },
+ "focal_binary": {
+  "within": {
+   "worse": 0.6524,
+   "naive": 0.5095,
+   "rg_group": 0.9861,
+   "cal_group": 0.9446,
+   "dd_tuned": 0.9517,
+   "gain": 0.9576
+  },
+  "between": {
+   "worse": 0.7964,
+   "naive": 0.1626,
+   "rg_group": 0.9588,
+   "cal_group": 0.9446,
+   "dd_tuned": 0.9508,
+   "gain": 0.9412
+  },
+  "n": [
+   210,
+   609
+  ]
+ }
+}

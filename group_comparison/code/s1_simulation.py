@@ -15,7 +15,7 @@ three most frequent topics, or every row, with strength delta (the share of a ro
 probability that group B redirects to other topics). This is what lets the study ask
 which departures matter for a comparison rather than whether any departure exists.
 
-Output: ~/.cache/run_out/cmm_v2_sim_raw.csv (one row per replication x estimator),
+Output: ~/.cache/run_out/study1_sim_raw.csv (one row per replication x estimator),
         results/sim_summary.csv (condition means)
 """
 import csv, itertools, os, sys, time
@@ -26,7 +26,7 @@ from estimators import ESTIMATORS, WITH_SE, estimate, tv
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(ROOT, "results"); os.makedirs(RES, exist_ok=True)
 # the per-replication file is large; it stays outside the repository
-RAW = os.path.join(os.path.expanduser("~"), ".cache", "run_out", "cmm_v2_sim_raw.csv")
+RAW = os.path.join(os.path.expanduser("~"), ".cache", "run_out", "study1_sim_raw.csv")
 os.makedirs(os.path.dirname(RAW), exist_ok=True)
 K, N, R, SEED = 21, 5000, 500, 20261102
 BASE = 1 / np.arange(1, K + 1) ** 1.1

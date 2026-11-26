@@ -1,84 +1,96 @@
-# Measurement invariance in LLM text annotation
+# Estimating group differences in topic prevalence from machine-coded text
 
-Replication package for a study that treats a large language model annotator as a
-**measurement instrument** and asks whether it measures the same construct the same
-way across subgroups of text — country, institutional venue, text length, period.
+Replication material for
 
-Submitted to *Social Science Computer Review*. This repository will be finalised at
-submission; the DOI and the article reference will be added here.
+> Gül, Fatih. "Estimating Group Differences in Topic Prevalence From Machine-Coded Text:
+> Back-Calculation, Calibration, and Difference Estimators." Manuscript under review.
 
-## What is here
+The article asks how a coder's errors (a supervised classifier or a large language model)
+carry into a comparison of topic prevalence between two groups of texts, and which
+estimators recover the difference from a hand-coded validation sample. It evaluates
+confusion-matrix back-calculation, a per-category (Rogan–Gladen) correction, and
+calibration and difference estimators in simulations and with 30 real coder–condition
+combinations on seven Comparative Agendas Project corpora.
+
+## Layout
 
 ```
-code/     data preparation, annotation runner, invariance analysis, figures, tables
-data/     the derived analysis corpora (1,500 items each, calibration/test split)
-results/  model outputs (.npz), analysis tables (.csv), headline metrics
-figures/  manuscript figures, greyscale-legible
+code/                     building the corpora and coding them
+  cap_codebook.py           the 21 CAP major topics and the corpus definitions
+  01_prepare_corpora.py     the seven analysis corpora from the public CAP files
+  02_annotate.py            the language models (prompts and scoring are in the script)
+  06_supervised_baseline.py the in-corpus TF-IDF classifiers (5-fold cross-fitting)
+data/                     the derived corpora (1,500 human-coded items each)
+results/annotations/      one .npz per coder x condition x corpus (scores for the 21 topics)
+run_large_models.sh       the 7-8B runs on an 8 GB GPU
+
+group_comparison/         the analyses reported in the article
+  code/estimators.py        every estimator and its standard error (Online Appendix A)
+  code/s0_transfer_classifier.py  classifier trained outside the corpus (or the pair of corpora)
+  code/s1_simulation.py     Study 1
+  code/s2_real_coders.py    Study 2
+  code/s3_illustration.py   the worked example and the planning tables
+  code/s4_validity.py       measurement quality within each group (Section 5.3)
+  code/s5_label_noise.py    error in the hand codes (Section 5.5)
+  code/s6_schemes.py        other coding schemes (Section 6; --sim, --real)
+  code/s7_extensions.py     regularised back-calculation, simulation with the real matrices,
+                            intervals by prevalence and joint coverage (Section 5.6)
+  code/s8_population.py     the full CAP corpora as the population (needs data_raw/, below)
+  code/s9_coders.py         prior-corrected language-model codes and synthetic strong coders
+  code/*_summary.py, claims.py   the numbers quoted in the text
+  code/tables.py, tables_v3.py, figures.py   the tables and figures
+  code/verify_claims.py     checks every number in the article against the results
+                            (needs the article source, which is not in this repository)
+  results/                  every result file the article reports
+  figures/                  Figures 1-4 and A1
 ```
-
-## Data
-
-Seven corpora from the **Comparative Agendas Project**, all coded by trained human
-coders against the same CAP master codebook of 21 major policy topics:
-
-| Corpus | Country | Venue |
-|---|---|---|
-| U.S. Congressional bill titles | US | Legislative |
-| New York Times front-page headlines | US | Media |
-| U.S. executive orders | US | Executive |
-| U.S. Supreme Court case summaries | US | Judicial |
-| UK Acts of Parliament long titles | UK | Legislative |
-| UK Prime Minister's Questions | UK | Legislative (oral) |
-| UK newspaper front-page headlines | UK | Media |
-
-A single codebook applied across institutions and countries is what makes the design
-work: domain shift varies while the coding scheme is held fixed.
-
-The raw CAP files are **not redistributed here**. `code/01_prepare_corpora.py` downloads
-them from the project's own servers and rebuilds the derived corpora deterministically
-(`SEED = 20260905`). Source: <https://www.comparativeagendas.net/datasets_codebooks>.
-
-## Models
-
-Six open-weight instruction-tuned models from five independent developers, all loaded
-in 4-bit NF4 so that quantisation is constant across the roster:
-OLMo-2 1B · Qwen2.5 1.5B · SmolLM2 1.7B · Granite 3.1 2B · Qwen2.5 3B · Phi-3.5-mini.
-
-Gated releases were deliberately excluded so that anyone can reproduce the run without
-credentials, and closed API models were excluded because they are silently versioned
-and cannot be re-run.
-
-Each item is scored by restricting the logits at the answer position to the 21
-single-token option letters. Every item therefore receives a response — no refusals and
-no unparsable output, which matters because that attrition would itself differ across
-subgroups and contaminate the invariance test.
 
 ## Reproducing
 
-```bash
-python -m venv .venv && ./.venv/bin/pip install -r requirements.txt
-python code/01_prepare_corpora.py      # downloads CAP, rebuilds data/
-bash   code/run_all.sh                 # 6 models x 3 conditions x 7 corpora, resumable
-python code/06_supervised_baseline.py # TF-IDF coders, 5-fold cross-fitting -> results/annotations/
-python code/03_invariance.py           # DIF, invariance ladder, corrections -> results/
-python code/07_mechanism.py            # derivation check -> results/mechanism.csv
-python code/08_uncertainty.py --boot 3000  # cluster bootstrap -> results/metrics/intervals.json
-python code/09_pilot_response_format.py    # letters vs names pilot -> results/pilot/
-python code/10_within_corpus.py        # invariance inside each corpus (same prompt, same classifier)
-python code/11_pooled_supervised.py    # one supervised classifier for all corpora, then:
-python code/03_invariance.py   --ann_dir results/annotations_pooled_sup --out_dir results/pooled_supervised
-python code/10_within_corpus.py --ann_dir results/annotations_pooled_sup --out_dir results/pooled_supervised
-python code/12_placebo_calibration.py  # false-positive rate of every test under random splits
-python code/04_figures.py              # figures/
-python code/05_tables.py               # manuscript tables
-python code/verify_claims.py           # recomputes every number stated in the paper
+Run from `group_comparison/`, in this order (times on a 16-core CPU):
+
+```
+python code/s0_transfer_classifier.py            # ~6 min
+python code/s1_simulation.py                     # ~5 min; per-replication file in ~/.cache/run_out/
+python code/s2_real_coders.py                    # ~10 min
+python code/s3_illustration.py
+python code/s4_validity.py                       # ~1 min
+python code/s5_label_noise.py                    # ~15 min
+python code/s6_schemes.py --sim && python code/s6_schemes.py --real   # ~10 min, 12 processes
+python code/s7_extensions.py                     # ~11 min, 14 processes
+python code/s8_population.py                     # ~1 min, needs data_raw/
+python code/s9_coders.py                         # <1 min
+python code/s4_summary.py && python code/s56_summary.py && python code/s789_summary.py
+python code/claims.py && python code/tables.py && python code/tables_v3.py && python code/figures.py
 ```
 
-`code/test_invariance_smoke.py` injects a known invariance violation into synthetic
-annotations and checks that the analysis recovers it. Run it before trusting a change
-to the analysis code.
+Every script fixes its random seeds (corpora 20260905; analyses 20261102 and offsets).
+The coder outputs in `results/annotations/` and `group_comparison/results/annotations_*`
+let every analysis run without a GPU. To recode the corpora, run `code/02_annotate.py`
+(1-4B models on a 4 GB GPU) and `run_large_models.sh` (7-8B models on an 8 GB GPU).
 
-## Licence
+`s8_population.py` needs the original CAP downloads in `data_raw/` (file names in
+`code/cap_codebook.py`); they are public at the Comparative Agendas Project and are not
+redistributed here.
 
-Code: MIT (see `LICENSE`). The CAP data are distributed by the Comparative Agendas
-Project under its own terms and are not included here.
+## Software
+
+Analyses: Python 3.13.5, numpy 2.2.4, scipy 1.15.3, scikit-learn 1.9.0, pandas 2.2.3,
+matplotlib 3.10.1. Language-model coding: torch 2.6.0 (CUDA 12.4), transformers 5.16.1,
+bitsandbytes 0.50.2, accelerate 1.14.0; models in 4-bit NF4 from the Hugging Face
+repositories named in `code/02_annotate.py`. The 7-8B models were run with the same
+script on a second machine. See `requirements.txt`.
+
+## Data
+
+Seven corpora from the Comparative Agendas Project (https://www.comparativeagendas.net),
+each restricted to the 21 shared major topics, deduplicated, and subsampled to 1,500
+items: U.S. Congressional bill titles, New York Times front-page headlines, U.S. executive
+orders, U.S. Supreme Court case summaries, UK Acts of Parliament, UK Prime Minister's
+Questions, and UK newspaper front pages. Please cite the Comparative Agendas Project when
+using the derived corpora.
+
+## License
+
+Code: MIT (see `LICENSE`). Derived corpora: subject to the terms of the Comparative
+Agendas Project.

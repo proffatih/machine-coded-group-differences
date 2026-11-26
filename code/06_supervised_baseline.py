@@ -25,7 +25,7 @@ Two learners:
                  result is not an artefact of one learner.
 
 Output is written in the same .npz shard format as the language-model runs so that
-03_invariance.py consumes both without modification.
+the analyses in group_comparison/ read both without modification.
 
 Usage: python code/06_supervised_baseline.py
 """
